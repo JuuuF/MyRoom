@@ -2,7 +2,7 @@
 
 ## W\*F if this place?
 
-If you're new to this place, welcome! It is nice to see you here. However, this was not intendent to happen. But feel free to take a look around, get comfy, maybe grab yourself a tea if you can find one lying around. And please don't mind the mess here. I don't really get a lot of visitors in here and I have not yet had the time to take a closer look at the possibilities this place has to offer.
+If you're new to this place, welcome! It is nice to see you here. However, this was not intendent to happen. But feel free to take a look around, get comfy, maybe grab yourself a cup of tea if you can find one lying around. And please don't mind the mess here. I don't really get a lot of visitors in here and I have not yet had the time to take a closer look at the possibilities this place has to offer.
 
 If you wonder, what this is all about, I am sorry to tell you that I don't really have a plan either. Yet. But I an confident that, eventually, as time passes by, this will all take shape. I just hope that shape does not resemble what's going on in my head. That would be concerning. For the time being, this is just my little playground. Or padded cell. It just depends on the way you look at it. If I had to describe it to a real person, I would probably say something like:
 

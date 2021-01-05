@@ -1,72 +1,143 @@
-//----------------------------------------------------------------
-// led functions
 
 
-/**
-   Fill a solid strip from @code{first} to @code{last} (non-inclusive).
+//======================================================================
+// single-pixel functions
+
+
+
+/**---------------------------------------------------------------------
+  addPixelColor
+
+  Add a color to a pixel instead of overriding it.
+
+  Params:
+    int pixel                   pixel to write to.
+    RgbwColor color             RBW color.
+  
 */
-void fillSolid(int first, int last, RgbwColor color) {
-  for (int i = first; i < last; i++) {
+void addPixelColor(int pixel, RgbwColor color) {
+  RgbwColor current = strip.GetPixelColor(pixel);
+  RgbwColor result = RgbwColor(
+                       constrain(current.R + color.R, 0, 255),
+                       constrain(current.G + color.G, 0, 255),
+                       constrain(current.B + color.B, 0, 255),
+                       constrain(current.W + color.W, 0, 255)
+                     );
+  strip.SetPixelColor(pixel, result);
+}
+
+
+
+//======================================================================
+// multi-pixel functions
+
+
+
+/**---------------------------------------------------------------------
+  setSolid
+
+  Set a block of pixels to a given color.
+  This method will override previous values.
+
+  Params:
+    int start_point = 0         pixel index to start from.
+    int end_point  = NUM_LEDs   pixel index of last pixel (non-inclusive).
+    RgbwColor color             RGBW color.
+*/
+
+void setSolid(int start_point, int end_point, RgbwColor color) {
+  for (int i = start_point; i < end_point; i++) {
     strip.SetPixelColor(i, color);
   }
 }
-/**
-   Fill a solid strip from beginning to @code{last} (non-inclusive).
-*/
-void fillSolid(int last, RgbwColor color) {
-  for (int i = 0; i < last; i++) {
+
+void setSolid(int end_point, RgbwColor color) {
+  for (int i = 0; i < end_point; i++) {
     strip.SetPixelColor(i, color);
   }
 }
-/**
-   In case no range is given, fill the whole strip with the given color.
-*/
-void fillSolid(RgbwColor color) {
+
+void setSolid(RgbwColor color) {
   for (int i = 0; i < NUM_LEDs; i++) {
     strip.SetPixelColor(i, color);
   }
 }
 
 
-/**
-   Add a color block from @code{start_point} to @code{end_point}.
-   These parameters are float values.
+
+/**---------------------------------------------------------------------
+  addSolid
+
+  Set a block of pixels to a given color.
+  In contrast to setSolid(), this method adds the given pixel color
+  to the already existing pixel.
+
+  Params:
+    int start_point = 0         pixel index to start from.
+    int end_point  = NUM_LEDs   pixel index of last pixel (non-inclusive).
+    RgbwColor color             RGBW color.
 */
-void fillFloat(float start_point, float end_point, RgbwColor color) {
-  fillFloat(start_point, end_point, color, true);
+
+void addSolid(int start_point, int end_point, RgbwColor color) {
+  for (int i = 0; i < end_point - start_point; i++) {
+    addPixelColor(start_point + i, color);
+  }
 }
-/**
-   Fill a color block from @code{start_point} to @code{end_point}.
-   These parameters are float values.
-   The parameter @code{add} determines whether colors are added or overridden.
+
+void addSolid(int end_point, RgbwColor color) {
+  for (int i = 0; i < end_point; i++) {
+    addPixelColor(i, color);
+  }
+}
+
+void addSolid(RgbwColor color) {
+  for (int i = 0; i < NUM_LEDs; i++) {
+    // TODO addPixelColor(color);
+  }
+}
+
+
+
+/**---------------------------------------------------------------------
+  addFloat
+
+  Set a block of pixels to a given color.
+  In contrast to addSolid(), this methos uses floating point boundaries.
+
+  Params:
+    float start_point           starting position.
+    float end_pint              end position.
+    RgbwColor color             RBGW color.
+    bool add = true             add to or override existing colors.
+
 */
-void fillFloat(float start_point, float end_point, RgbwColor color, bool add) {
+
+void addFloat(float start_point, float end_point, RgbwColor color, bool add) {
 
   // first segment
-  if (end_point - start_point < start_point - (int) start_point) {
-    // only on one pixel
-
-    uint8_t dim = 255 * (1 - (end_point - start_point));
-    RgbwColor res_color = color.Dim(dim);
-    addPixelColor((int) start_point, res_color);
-    return;
+  float first_seg_length = min(end_point - start_point, start_point - (int) start_point);
+  uint8_t dim = 255 * (1 - first_seg_length);
+  if (add) {
+    addPixelColor((int) start_point, RgbwColor(color.Dim(dim)));
   } else {
-    // spans multiple pixels
+    strip.SetPixelColor((int) start_point, RgbwColor(color.Dim(dim)));
+  }
 
-    uint8_t dim = 255 * (1 - start_point - (int) start_point);
-    RgbwColor res_color = color.Dim(dim);
-    addPixelColor((int) start_point, res_color);
+  if (end_point - start_point < start_point - (int) start_point) {
+    // segment only on one pixel
+    return;
   }
 
   // middle segment
   if (add) {
     addSolid(ceil(start_point), floor(end_point), color);
   } else {
-    fillSolid(ceil(start_point), floor(end_point), color);
+    setSolid(ceil(start_point), floor(end_point), color);
   }
 
+
   // last segment
-  uint8_t dim = 255 * (end_point - (int) end_point);
+  dim = 255 * (end_point - (int) end_point);
   RgbwColor res_color = color.Dim(dim);
   if (add) {
     addPixelColor((int) end_point, res_color);
@@ -76,56 +147,23 @@ void fillFloat(float start_point, float end_point, RgbwColor color, bool add) {
 
 }
 
-
-/**
-    Add a color block from @code{start_position} to @code{end_position}
-    to already existing colors on led strip.
-*/
-void addSolid(uint8_t start_position, uint8_t end_position, RgbwColor color) {
-  for (int i = 0; i < end_position - start_position; i++) {
-    addPixelColor(start_position + i, color);
-  }
+void addFloat(float start_point, float end_point, RgbwColor color) {
+  addFloat(start_point, end_point, color, true);
 }
 
 
-/**
-   change any light on strip to a white sparkle.
-*/
-void randomSparkles() {
-  if (random(5) == 0) {
-    int index = random(NUM_LEDs);
-    while (strip.GetPixelColor(index).R == 0 &&
-           strip.GetPixelColor(index).G == 0 &&
-           strip.GetPixelColor(index).B == 0 &&
-           strip.GetPixelColor(index).W == 0) {
-      index++;
-      if (index == NUM_LEDs)
-        return;
-    }
-    int sparkle_color = maxColorVal(strip.GetPixelColor(index));
-    strip.SetPixelColor(index, RgbwColor(0, 0, 0, sparkle_color));
-  }
-}
+
+//======================================================================
+// all-pixel functions
 
 
-/**
-   Add a color to a pixel instead of overwriting it.
-*/
-void addPixelColor(int pixel, RgbwColor add) {
-  RgbwColor current = strip.GetPixelColor(pixel);
-  RgbwColor result = RgbwColor(
-                       constrain(current.R + add.R, 0, 255),
-                       constrain(current.G + add.G, 0, 255),
-                       constrain(current.B + add.B, 0, 255),
-                       constrain(current.W + add.W, 0, 255)
-                     );
-  strip.SetPixelColor(pixel, result);
-}
+/**---------------------------------------------------------------------
+  fadeToBlackBy
+   
+   Fade all lights to black by some steps.
 
-
-/**
-   Fade all lights to black by @code{amount} steps.
-   @code{amount} € [0,255]
+   Params:
+    uint8_t amount              amount of steps to reduce color values.
 */
 void fadeToBlackBy(uint8_t amount) {
   for (int i = 0; i < NUM_LEDs; i++) {
@@ -140,17 +178,19 @@ void fadeToBlackBy(uint8_t amount) {
   }
 }
 
-/**
-   Fade all lights to black by a random amount each.
-*/
-void fadeToBlackRandom() {
-  fadeToBlackRandom(0, 128);
-}
-/**
 
-   Fade all lights to black by a random amount each.
-   Bounds are given by @code{lower} and @code{upper}.
+
+/**---------------------------------------------------------------------
+  fadeToBlackRandom
+  
+  Fade all lights to black by a random amount each. Lower and upper bounds
+  can be given.
+
+  Params:
+    uint8_t lower = 0           lower boundary.
+    uint8_t upper = 128         upper boundary.
 */
+
 void fadeToBlackRandom(int lower, int upper) {
   for (int i = 0; i < NUM_LEDs; i++) {
     RgbwColor current = strip.GetPixelColor(i);
@@ -165,9 +205,21 @@ void fadeToBlackRandom(int lower, int upper) {
   }
 }
 
-/**
-   Multiply each led color by some factor.
+void fadeToBlackRandom() {
+  fadeToBlackRandom(0, 128);
+}
+
+
+
+/**---------------------------------------------------------------------
+  multByFactor
+  
+  Multiply all lights by some factor.
+
+  Params:
+    float factor                multiplying factor.
 */
+
 void multByFactor(float factor) {
   for (int i = 0; i < NUM_LEDs; i++) {
     RgbwColor color = strip.GetPixelColor(i);
@@ -181,11 +233,42 @@ void multByFactor(float factor) {
 }
 
 
-/**
-   Clear all leds on the strip.
+
+/**---------------------------------------------------------------------
+  clear_strip
+  
+  Turn off all lights.
 */
 void clear_strip() {
   for (uint8_t i = 0; i < NUM_LEDs; i++) {
-    strip.SetPixelColor(i, RgbwColor(0, 0, 0, 0));
+    strip.SetPixelColor(i, RgbwColor(0));
+  }
+}
+
+
+
+//======================================================================
+// special-pixel functions
+
+
+
+/**---------------------------------------------------------------------
+  randomSparkles
+
+  Randomly turn a pixel color to equally bright white pixel.
+*/
+void randomSparkles() {
+  if (random(5) == 0) {
+    int index = random(NUM_LEDs);
+    while (strip.GetPixelColor(index).R == 0 &&
+           strip.GetPixelColor(index).G == 0 &&
+           strip.GetPixelColor(index).B == 0 &&
+           strip.GetPixelColor(index).W == 0) {
+      index++;
+      if (index == NUM_LEDs)
+        return;
+    }
+    int sparkle_color = maxColorVal(strip.GetPixelColor(index));
+    strip.SetPixelColor(index, RgbwColor(0, 0, 0, sparkle_color));
   }
 }

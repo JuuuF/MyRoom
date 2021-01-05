@@ -159,6 +159,7 @@ void show(bool safe_mode) {
       delay(10);
     }
   }
+  strip.Show();
 }
 
 void show() {

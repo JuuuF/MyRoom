@@ -101,7 +101,7 @@ void addSolid(RgbwColor color) {
 /**---------------------------------------------------------------------
   addFloat
 
-  Set a block of pixels to a given color.
+  Set a floating block of pixels to a given color.
   In contrast to addSolid(), this methos uses floating point boundaries.
 
   Params:

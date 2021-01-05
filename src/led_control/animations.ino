@@ -2,6 +2,7 @@
 //----------------------------------------------------------------
 // animations
 
+
 void DrawPingPong() {
   static float block_len = 3.0;
   static int dir = 1;
@@ -16,7 +17,7 @@ void DrawPingPong() {
   fadeToBlackRandom(12 * poti_m_val, 32 * poti_m_val);
   // randomSparkles();
   RgbwColor color = Hsvw2Rgbw(color_picker, 1.0, poti_b_val, 0);
-  fillFloat(pos, pos + block_len, color);
+  addFloat(pos, pos + block_len, color);
 
 
   // end check
@@ -55,7 +56,7 @@ void DrawBallBounce() {
   pos = abs(h * exp(-k * t) * cos(w * pow(t, 2)));
 
   // draw
-  fillFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, poti_b_val, 0), true);
+  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, poti_b_val, 0), true);
 
   // update params
   t += step * dir;
@@ -90,7 +91,7 @@ void DrawBallBounce2() {
   pos = h - abs(h * exp(-k * t) * cos(w * pow(t, 2)));
 
   // draw
-  fillFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, poti_b_val, 0), true);
+  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, poti_b_val, 0), true);
 
   // update params
   t += step * dir;

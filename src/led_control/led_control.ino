@@ -1,4 +1,5 @@
 
+//----------------------------------------------------------------------
 // imports
 
 #include <NeoPixelBus.h>
@@ -6,8 +7,11 @@
 //#include <NeoPixelSegmentBus.h>
 //#include <NeoPixelAnimator.h>
 
+using namespace std;
 
 
+
+//----------------------------------------------------------------------
 // I/O
 
 #define POTI_B_PIN 34
@@ -16,28 +20,32 @@
 #define BTN_R_PIN 33
 #define LED_PIN 22
 
-// input variables
-float poti_b_val, poti_m_val;         // normalized to [0,1]
-bool btn_l, btn_r;                    // true if button released
+/* poti variables, normalized to [0,1] */
+float poti_b_val, poti_m_val;
+/* button states, true on falling edge */
+bool btn_l, btn_r;
 
 
 
+//----------------------------------------------------------------------
 // led settings
 
 #define NUM_LEDs 46
 float MAX_MILLIAMPS = INFINITY;
+
 NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip(NUM_LEDs, LED_PIN);
 
 
 
+//----------------------------------------------------------------------
 // utils
 
-int scene = 0;
-int scene_count = 4;
+int SCENE = 0;
+int SCENE_COUNT = 4;
 
 
 
-//----------------------------------------------------------------
+//======================================================================
 // main functions
 
 void setup()
@@ -52,8 +60,8 @@ void setup()
   randomSeed(analogRead(0));
 
   // initialize LED strip
-  setMaxMilliAmps(900);
-  
+  setMaxMilliamps(900);
+
   strip.Begin();
   strip.Show();
 

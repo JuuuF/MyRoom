@@ -4,6 +4,14 @@
 # Blender
 *.blend[1-9]
 
+# PlatformIO
+*.pio
+*.vscode
+include/
+lib/
+platformio.ini
+
+
 # Compiled Object files
 *.slo
 *.lo

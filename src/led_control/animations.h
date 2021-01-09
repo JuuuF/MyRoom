@@ -2,6 +2,11 @@
 //----------------------------------------------------------------
 // animations
 
+#pragma once
+#include "led_functions.h"
+#include "utils.h"
+
+extern const int NUM_LEDs;
 
 void DrawPingPong() {
   static float block_len = 3.0;
@@ -11,12 +16,12 @@ void DrawPingPong() {
   static float color_picker = 0.0;
   static float color_delta = 5;
 
-  float speed = poti_m_val * 4;
+  float speed = 4; //poti_m_val * 4;
 
   // draw block
-  fadeToBlackRandom(12 * poti_m_val, 32 * poti_m_val);
+  fadeToBlackRandom();//12 * poti_m_val, 32 * poti_m_val);
   // randomSparkles();
-  RgbwColor color = Hsvw2Rgbw(color_picker, 1.0, poti_b_val, 0);
+  RgbwColor color = Hsvw2Rgbw(color_picker, 1.0, 0.5, 0);//poti_b_val, 0);
   addFloat(pos, pos + block_len, color);
 
 
@@ -56,7 +61,7 @@ void DrawBallBounce() {
   pos = abs(h * exp(-k * t) * cos(w * pow(t, 2)));
 
   // draw
-  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, poti_b_val, 0), true);
+  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, 0.5, 0)); //poti_b_val, 0), true);
 
   // update params
   t += step * dir;
@@ -91,7 +96,7 @@ void DrawBallBounce2() {
   pos = h - abs(h * exp(-k * t) * cos(w * pow(t, 2)));
 
   // draw
-  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, poti_b_val, 0), true);
+  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, 0.5,0));// poti_b_val, 0), true);
 
   // update params
   t += step * dir;

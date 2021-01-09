@@ -3,6 +3,11 @@
 //======================================================================
 // single-pixel functions
 
+#pragma once
+#include "utils.h"
+
+extern const int NUM_LEDs;
+extern NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip;
 
 
 /**---------------------------------------------------------------------
@@ -246,6 +251,43 @@ void clear_strip() {
 }
 
 
+/**---------------------------------------------------------------------
+  show
+  
+  Draw leds to strip with respect to MAX_MILLIAMPS.
+  Led colors are dimmed to keep current draw under MAX_MILLIAMPS.
+
+  Params:
+    bool safe_mode = true       don't display if something went wrong.
+                                NOTE: will draw 12.5 mA.
+  
+*/
+void show(bool safe_mode) {
+  int draw = calculateMilliAmps();
+  if (draw > MAX_MILLIAMPS) {
+    // dimm all leds
+    float fac = (float) MAX_MILLIAMPS / draw;
+    multByFactor(fac * 0.95); // just to be sure
+  }
+
+  // warning blink if something goes wrong
+  if (safe_mode && calculateMilliAmps() > MAX_MILLIAMPS) {
+    clear_strip();
+    for (int i = 0; i < 3; i++) {
+      setSolid(0,5,RgbwColor(32,0,0,0));
+      strip.Show();
+      delay(10);
+      setSolid(0,5,RgbwColor(0));
+      strip.Show();
+      delay(10);
+    }
+  }
+  strip.Show();
+}
+
+void show() {
+  show(true);
+}
 
 //======================================================================
 // special-pixel functions

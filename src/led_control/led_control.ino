@@ -7,6 +7,13 @@
 //#include <NeoPixelSegmentBus.h>
 //#include <NeoPixelAnimator.h>
 
+#include <vector>
+#include <tuple>
+
+#include "led_functions.h"
+#include "utils.h"
+#include "animations.h"
+
 using namespace std;
 
 
@@ -14,23 +21,19 @@ using namespace std;
 //----------------------------------------------------------------------
 // I/O
 
+
 #define POTI_B_PIN 34
 #define POTI_M_PIN 35
 #define BTN_L_PIN 32
 #define BTN_R_PIN 33
 #define LED_PIN 22
 
-/* poti variables, normalized to [0,1] */
-float poti_b_val, poti_m_val;
-/* button states, true on falling edge */
-bool btn_l, btn_r;
-
-
+vector<Input*> inputs;
 
 //----------------------------------------------------------------------
 // led settings
 
-#define NUM_LEDs 46
+const int NUM_LEDs = 46;
 float MAX_MILLIAMPS = INFINITY;
 
 NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip(NUM_LEDs, LED_PIN);
@@ -50,14 +53,21 @@ int SCENE_COUNT = 4;
 
 void setup()
 {
+  
+  randomSeed(analogRead(0));
+
   // I/O declaration
-  pinMode(POTI_B_PIN, INPUT);
-  pinMode(POTI_M_PIN, INPUT);
-  pinMode(BTN_L_PIN, INPUT_PULLUP);
-  pinMode(BTN_R_PIN, INPUT_PULLUP);
+  
+  vector<tuple<int, int>> input_values = {
+    make_tuple(POTI, POTI_B_PIN),
+    make_tuple(POTI, POTI_M_PIN),
+    make_tuple(BUTTON, BTN_L_PIN),
+    make_tuple(BUTTON, BTN_R_PIN)
+  };
+  inputs = set_inputs(input_values);
+  
   pinMode(LED_PIN, OUTPUT);
 
-  randomSeed(analogRead(0));
 
   // initialize LED strip
   setMaxMilliamps(900);
@@ -68,10 +78,10 @@ void setup()
 }
 
 void loop() {
-  read_inputs();
+
+  update_inputs();
   set_scene();
 
-  fadeToBlackBy(poti_m_val * 16);
   DrawBallBounce();
   DrawBallBounce2();
 

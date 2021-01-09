@@ -1,6 +1,6 @@
 # JuuuF - mental state: ~concerning~ great!
 
-## W\*F if this place?
+## W\*F is this place?
 
 If you're new to this place, welcome! It is nice to see you here. However, this was not intendent to happen. But feel free to take a look around, get comfy, maybe grab yourself a cup of tea if you can find one lying around. And please don't mind the mess here. I don't really get a lot of visitors in here and I have not yet had the time to take a closer look at the possibilities this place has to offer.
 

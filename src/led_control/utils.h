@@ -23,14 +23,6 @@ using namespace std;
 */
 enum InputTypes { POTI, BUTTON };
 
-/**---------------------------------------------------------------------
-  InputIndices
-
-  Enumeration for the inputs. These are heavily dependant on the order
-  in which inputs are added in the setup() function!
-*/
-enum InputIndices { BRIGHTNESS, MOD, BTN_L, BTN_R };
-
 
 /**---------------------------------------------------------------------
   Input
@@ -40,13 +32,17 @@ enum InputIndices { BRIGHTNESS, MOD, BTN_L, BTN_R };
 
   Params:
     int PIN                     hardware pin of input.
+    byte identifier             identifier / name for the input.
 */
 class Input {
   public:
     const int PIN;              // input pin
+    const byte ID;              // identifier for input
 
     /* constructor */
-    Input(int pin) : PIN(pin) {};
+    Input(int pin, byte identifier)
+      : PIN(pin),
+        ID(identifier) {};
 
     /* update input state */
     virtual void update() = 0;
@@ -60,11 +56,11 @@ class Input {
 */
 class Button : public Input {
   private:
-    bool current, rising, falling;  // button states
+    bool _current, _rising, _falling;  // button states
 
   public:
     /* constructor */
-    Button(int pin) : Input(pin) {
+    Button(int pin, byte identifier) : Input(pin, identifier) {
       // initialize inputs
       update();
     }
@@ -76,34 +72,34 @@ class Button : public Input {
       Update the button's states reguarding the current input.
 
       Sets:
-        current                 true if pressed
-        rising                  true if rising edge
-        falling                 true if falling edge
+        _current                true if pressed
+        _rising                 true if rising edge
+        _falling                true if falling edge
     */
     void update() {
       // get current state
-      bool last = current;
-      current = digitalRead(PIN) == HIGH;
+      bool last = _current;
+      _current = digitalRead(PIN) == HIGH;
 
       // rising edge
-      rising = current && !last;
+      _rising = _current && !last;
 
       // falling edge
-      falling = !current && last;
+      _falling = !_current && last;
     }
 
 
     /* getter functions */
     bool is_pressed() {
-      return current;
+      return _current;
     }
 
     bool is_rising() {
-      return rising;
+      return _rising;
     }
 
     bool is_falling() {
-      return falling;
+      return _falling;
     }
 
 };
@@ -122,7 +118,7 @@ class Poti : public Input {
 
   public:
     /* constructor */
-    Poti(int pin, int res = 4096) : Input(pin) {
+    Poti(int pin, byte identifier, int res = 4096) : Input(pin, identifier) {
       input_resolution = res;
       update();
     };
@@ -181,9 +177,13 @@ void update_inputs() {
   Input type is expected to be from enumeration InputType.
 
   Params:
-    map<String, int> inputs         inputs as map.
+    vector<tuple<int, int, byte>> inputs:
+        inputs as vector of tuples.
+        - first int:    type of input (see InputType)
+        - second int:   input pin
+        - byte:         input identifier / name
 */
-vector<Input*> set_inputs(vector<tuple<int, int>> inputs) {
+vector<Input*> set_inputs(vector<tuple<int, int, byte>> inputs) {
 
   vector<Input*> res;
 
@@ -191,13 +191,16 @@ vector<Input*> set_inputs(vector<tuple<int, int>> inputs) {
 
     if (get<0>(inputs[i]) == POTI) {
       // poti input
-      res.push_back(new Poti(get<1>(inputs[i])));
+      res.push_back(new Poti(get<1>(inputs[i]), get<2>(inputs[i])));
       pinMode(get<1>(inputs[i]), INPUT);
 
     } else if (get<0>(inputs[i]) == BUTTON) {
       // button input
-      res.push_back(new Button(get<1>(inputs[i])));
+      res.push_back(new Button(get<1>(inputs[i]), get<2>(inputs[i])));
       pinMode(get<1>(inputs[i]), INPUT_PULLUP);
+    } else {
+      // unknown input
+      printf("WARNING: input type %i is not specified. Skipping input %i.", get<0>(inputs[i]), i);
     }
   }
 

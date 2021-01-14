@@ -23,9 +23,17 @@ using namespace std;
 
 
 #define POTI_B_PIN 34
+const byte BRIGHTNESS = 0;
+
 #define POTI_M_PIN 35
+const byte MOD = 1;
+
 #define BTN_L_PIN 32
+const byte LEFT_BUTTON = 2;
+
 #define BTN_R_PIN 33
+const byte RIGHT_BUTTON = 3;
+
 #define LED_PIN 22
 
 vector<Input*> inputs;
@@ -33,7 +41,7 @@ vector<Input*> inputs;
 //----------------------------------------------------------------------
 // led settings
 
-const int NUM_LEDs = 46;
+const int NUM_LEDs = 57;
 float MAX_MILLIAMPS = INFINITY;
 
 NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip(NUM_LEDs, LED_PIN);
@@ -58,11 +66,11 @@ void setup()
 
   // I/O declaration
   
-  vector<tuple<int, int>> input_values = {
-    make_tuple(POTI, POTI_B_PIN),
-    make_tuple(POTI, POTI_M_PIN),
-    make_tuple(BUTTON, BTN_L_PIN),
-    make_tuple(BUTTON, BTN_R_PIN)
+  vector<tuple<int, int, byte>> input_values = {
+    make_tuple(POTI, POTI_B_PIN, BRIGHTNESS),
+    make_tuple(POTI, POTI_M_PIN, MOD),
+    make_tuple(BUTTON, BTN_L_PIN, LEFT_BUTTON),
+    make_tuple(BUTTON, BTN_R_PIN, RIGHT_BUTTON)
   };
   inputs = set_inputs(input_values);
   

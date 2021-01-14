@@ -23,6 +23,14 @@ using namespace std;
 */
 enum InputTypes { POTI, BUTTON };
 
+/**---------------------------------------------------------------------
+  ButtonReadings
+
+  Enumeration for different types of button readings.
+*/
+enum ButtonReadings { CURRENT, RISING_EDGE, FALLING_EDGE };
+
+
 
 /**---------------------------------------------------------------------
   Input
@@ -46,6 +54,11 @@ class Input {
 
     /* update input state */
     virtual void update() = 0;
+
+    /* get identifier / name */
+    byte get_id() {
+      return ID;
+    }
 };
 
 /**---------------------------------------------------------------------
@@ -207,7 +220,98 @@ vector<Input*> set_inputs(vector<tuple<int, int, byte>> inputs) {
   return res;
 }
 
-// TODO: get_inputs(int input_idx) function, input_idx from InputIndices<
+
+
+/**---------------------------------------------------------------------
+  get_poti
+
+  Get the current reading of a poti input using its identifier.
+
+  Params:
+    byte identifier           identifier of poti.
+
+  Returns:
+    float                     value of poti, normalized to [0, 1],
+                              -1 if identifier is invalid.
+*/
+float get_poti(byte identifier) {
+
+  // find the right input
+  int idx = -1;
+  for (int i = 0; i < inputs.size(); i++) {
+    if (inputs[i]->get_id() == identifier) {
+      idx = i;
+      break;
+    }
+  }
+  if (idx == -1)
+    // identifier not found
+    return -1;
+
+  // get poti value
+  Poti* p;
+  try {
+    p = static_cast<Poti*>(inputs[idx]);
+  } catch (...) {
+    printf("ERROR: Static cast of \"Input\" to \"Poti\" failed. Maybe the input type does not match the function call.");
+    return -1;
+  }
+
+  // return poti value
+  return p->get_value();
+}
+
+
+/**---------------------------------------------------------------------
+  get_button
+
+  Get the current reading of a button using an identifier.
+
+  Params:
+    byte identifier           identifier of button.
+    int type = CURRENT        type of button reading (see ButtonReadings).
+
+  Returns:
+    bool                      false,          if identifier is invalid
+                              button reading, else.
+*/
+bool get_button(byte identifier, int reading_type = CURRENT) {
+
+  // find the right input
+  int idx = -1;
+  for (int i = 0; i < inputs.size(); i++) {
+    if (inputs[i]->get_id() == identifier) {
+      idx = i;
+      break;
+    }
+  }
+
+  if (idx == -1)
+    // identifier not found
+    return false;
+
+  // get button value
+  Button* b;
+  try {
+    b = static_cast<Button*>(inputs[idx]);
+
+  } catch (...) {
+    printf("ERROR: Static cast of \"Input\" to \"Button\" failed. Maybe the input type does not match the function call.");
+    return false;
+  }
+
+  // return button reading
+  switch (reading_type) {
+    case CURRENT:
+      return b->is_pressed();
+    case RISING_EDGE:
+      return b->is_rising();
+    case FALLING_EDGE:
+      return b->is_falling();
+    default:
+      return false;
+  }
+}
 
 //======================================================================
 // led getter functions

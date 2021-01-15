@@ -6,6 +6,8 @@
 #include "led_functions.h"
 #include "utils.h"
 
+using namespace std;
+
 extern const int NUM_LEDs;
 
 extern const byte BRIGHTNESS, MOD, LEFT_BUTTON, RIGHT_BUTTON;
@@ -174,6 +176,62 @@ class BouncingBall {
 
     void set_reversed(bool reversed) {
       _reversed = reversed;
+    }
+
+};
+
+
+
+/** ====================================================================
+
+*/
+class ColorWheel1D {
+  private:
+    float _r;               // raduis of wheel
+    float _m;               // mid point of wheel
+
+    float _rot;                   // current rotation
+    float _speed;                 // max speed
+    float _t;                     // time
+    float _dt;                    // time delta
+
+  public:
+    /* constructor */
+    ColorWheel1D(float r = NUM_LEDs / 2.0, float m = NUM_LEDs / 2.0, float speed = 10.0)
+      : _r(r), _m(m), _speed(speed) {
+      _rot = random(360);
+      _t = random(360);
+      _dt = random(200) / 20.0;
+    }
+
+
+    void update() {
+      float d = _dt; // * get_poti(MOD);
+      _t = (_t + d < 360) ? _t + d - 360 : _t + d;
+      _m = (sin(_t/180 * PI) + 1) * NUM_LEDs/2;
+      _rot = fmod(_rot + _speed, 360);
+    }
+
+    void draw() {
+      // fadeToBlackBy(4);
+      for (int i = 0; i < NUM_LEDs; i++) {
+        
+        // outside wheel
+        if (abs(i - _m) > _r)
+          continue;
+        
+        float h = _rot;//cos(_pos/180 * PI)*360;
+        
+        if(i - _m < 0) {
+          h = (h + 180) > 360 ? h - 180 : h + 180;
+        }
+        float s = abs(i - _m)/_r;
+        s *= 1.1;   // make the ends c o l o r f u l
+        float v = get_poti(BRIGHTNESS) / 2;
+        RgbwColor col = Hsvw2Rgbw(h, s, v, 0);
+        addPixelColor(i, col);
+        //strip.SetPixelColor(i, col);
+      }
     }
 
 };

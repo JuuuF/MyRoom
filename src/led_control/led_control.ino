@@ -61,11 +61,11 @@ int SCENE_COUNT = 4;
 
 void setup()
 {
-  
+
   randomSeed(analogRead(0));
 
   // I/O declaration
-  
+
   vector<tuple<int, int, byte>> input_values = {
     make_tuple(POTI, POTI_B_PIN, BRIGHTNESS),
     make_tuple(POTI, POTI_M_PIN, MOD),
@@ -73,9 +73,8 @@ void setup()
     make_tuple(BUTTON, BTN_R_PIN, RIGHT_BUTTON)
   };
   inputs = set_inputs(input_values);
-  
-  pinMode(LED_PIN, OUTPUT);
 
+  pinMode(LED_PIN, OUTPUT);
 
   // initialize LED strip
   setMaxMilliamps(900);
@@ -90,8 +89,25 @@ void loop() {
   update_inputs();
   set_scene();
 
-  DrawBallBounce();
-  DrawBallBounce2();
+  static BouncingBall* b1 = new BouncingBall();
+  
+  static BouncingBall* b2 = new BouncingBall();
+  b2->set_dampening(0.06);
+  b2->set_frequency(0.02);
+  b2->set_time_max(30);
+  b2->set_reversed(true);
+
+  fadeToBlackBy(get_poti(MOD) * 16);
+
+  b1->update();
+  b1->draw();
+  b2->update();
+  b2->draw();
+
+  /*
+    DrawBallBounce();
+    DrawBallBounce2();
+  */
 
   show();
   delay(20);

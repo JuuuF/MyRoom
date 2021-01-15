@@ -8,6 +8,8 @@
 
 extern const int NUM_LEDs;
 
+extern const byte BRIGHTNESS, MOD, LEFT_BUTTON, RIGHT_BUTTON;
+
 void DrawPingPong() {
   static float block_len = 3.0;
   static int dir = 1;
@@ -41,72 +43,137 @@ void DrawPingPong() {
 
 }
 
-void DrawBallBounce() {
+/** ====================================================================
+  BouncingBall
 
-  static float pos;
-  static const float e = 2.71828;
-  static const float k = 0.05;
-  static const float w = 0.01;
-  static const int h = NUM_LEDs;
-  static float t = random(50);
-  static int dir = 1;
-  static const float step = 0.1;
+  Not-so-realistic bouncing ball effect that changes in color.
+  Bouncing behavour based on equation:
+    y = abs( _h * e^( _d * x ) * cos( _w * x^2 ))
+*/
+class BouncingBall {
+  private:
+    // changing variables
+    float _pos;                   // current position
+    float _t;                     // current time
+    int _dir = 1;                 // current direction
+    float _color_hue;             // current hue color
+    float _h;                     // height from _start_pos to _end_pos
 
-  static const float size = 2.0;
+    // "constant" variables which are technically not constant
+    // because C++ does not allow for arbitrary optional params to be set. thanks for that.
+    float _d;                     // dampening factor
+    float _f;                     // frequency modifier
+    float _start_point;           // start point
+    float _end_point;             // end point
+    float _step;                  // step size between updates
+    float _size;                  // ball size
+    float _color_delta;           // color change per update
+    float _time_max;              // time until animation reverse
+    bool _reversed;               // direction of bounce
 
-  static float color_picker = random(360);
-  static const float color_delta = 0.7;
+  public:
+    /** ----------------------------------------------------------------
+      Constructor
+    */
+    BouncingBall()
+    {
+      // initialize default values
+      // C++ does not let you choose an optional parameter to set, so we have to go this way
+      _d = 0.05;
+      _f = 0.01;
+      _start_point = 0;
+      _end_point = NUM_LEDs;
+      _step = 0.1;
+      _size = 2.0;
+      _color_delta  = 0.7;
+      _time_max = 40;
+      _reversed = false;
+      _pos = random(_start_point, _end_point);
+      _t = random(_time_max);
+      _dir = random(2) == 0 ? -1 : 1;
+      _color_hue = random(360);
+      _h = _end_point - _start_point;
+    }
 
-  // get position
-  pos = abs(h * exp(-k * t) * cos(w * pow(t, 2)));
+    // -----------------------------------------------------------------
+    // update / draw
 
-  // draw
-  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, 0.5, 0)); //poti_b_val, 0), true);
+    /**
+       update
 
-  // update params
-  t += step * dir;
-  color_picker += color_delta;
-  if (color_picker > 360) {
-    color_picker -= 360;
-  }
+       Advance the current state by one step.
+    */
+    void update() {
 
-  // reverse animation
-  if (t > 50 || t < 0) {
-    dir *= -1;
-  }
-}
+      // get position
+      _pos = abs(_h * exp(-_d * _t) * cos(_f * (_t * _t)));
+      if (_reversed)
+        _pos = _end_point - _pos;
 
-void DrawBallBounce2() {
+      // update params
+      _t += _step * _dir;
+      _color_hue += _color_delta;
+      if (_color_hue > 360) {
+        _color_hue -= 360;
+      }
 
-  static float pos;
-  static const float e = 2.71828;
-  static const float k = 0.06;
-  static const float w = 0.02;
-  static const int h = NUM_LEDs;
-  static float t = random(40);
-  static int dir = -1;
-  static const float step = 0.1;
+      // reverse animation
+      if (_t > _time_max || _t < 0) {
+        _dir *= -1;
+      }
 
-  static const float size = 2.0;
+    }
 
-  static float color_picker = random(360);
-  static const float color_delta = 1.0;
+    /**
+      draw
 
-  // get position
-  pos = h - abs(h * exp(-k * t) * cos(w * pow(t, 2)));
+      Draw the current state to the led strip.
+    */
+    void draw() {
+      float brightness = get_poti(BRIGHTNESS);
+      addFloat(_pos, _pos + _size, Hsvw2Rgbw(_color_hue, 1, brightness, 0));
+    }
 
-  // draw
-  addFloat(pos, pos + size, Hsvw2Rgbw(color_picker, 1, 0.5,0));// poti_b_val, 0), true);
 
-  // update params
-  t += step * dir;
-  color_picker += color_delta;
-  if (color_picker > 360) {
-    color_picker -= 360;
-  }
+    // -----------------------------------------------------------------
+    // setters for "constant" variables.
+    // These would be passed to the constructor, but C++ does not let you
+    // set arbitrary optional parameters. So this is the least bad
 
-  // reverse animation
-  if (t > 40 || t < 0) {
-    dir *= -1;
-  }
-}
+    void set_dampening(float d) {
+      _d = d;
+    }
+
+    void set_frequency(float f) {
+      _f = f;
+    }
+
+    void set_start_point(float pos) {
+      _start_point = pos;
+    }
+
+    void set_end_point(float pos) {
+      _end_point = pos;
+    }
+
+    void set_step(float step) {
+      _step = step;
+    }
+
+    void set_size(float size) {
+      _size = size;
+    }
+
+    void set_color_delta(float delta) {
+      _color_delta = delta;
+    }
+
+    void set_time_max(float time_max) {
+      _time_max = time_max;
+    }
+
+    void set_reversed(bool reversed) {
+      _reversed = reversed;
+    }
+
+};

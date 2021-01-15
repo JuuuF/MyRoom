@@ -385,7 +385,6 @@ void setMaxMilliamps(float val) {
 // other led functions
 
 
-
 /**---------------------------------------------------------------------
   Hsvw2Rgbw
 
@@ -398,7 +397,7 @@ void setMaxMilliamps(float val) {
     float H: [0,360]            hue.
     float S: [0,1]              saturation.
     float V: [0,1]              value.
-    float W: [0,255]            white component.
+    float W: [0,1]              white component.
 
   Returns:
     RgbwColor                   black     , if invalid inputs
@@ -406,9 +405,10 @@ void setMaxMilliamps(float val) {
 */
 RgbwColor Hsvw2Rgbw(float H, float S, float V, float W) {
 
-  if (H > 360 || H < 0 || S > 1 || S < 0 || V > 1 || V < 0 || W > 255 || W < 0) {
-    return RgbwColor(0);
-  }
+  H = constrain(H, 0, 360);
+  S = constrain(S, 0, 1);
+  V = constrain(V, 0, 1);
+  W = constrain(W, 0, 1);
 
   float C = S * V;
   float X = C * (1 - abs(fmod(H / 60.0, 2) - 1));
@@ -436,7 +436,7 @@ RgbwColor Hsvw2Rgbw(float H, float S, float V, float W) {
   int G = (g + m) * 255;
   int B = (b + m) * 255;
 
-  return RgbwColor(R, G, B, (int) W);
+  return RgbwColor(R, G, B, (int) (W*255));
 }
 
 

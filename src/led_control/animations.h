@@ -208,24 +208,24 @@ class ColorWheel1D {
     void update() {
       float d = _dt; // * get_poti(MOD);
       _t = (_t + d < 360) ? _t + d - 360 : _t + d;
-      _m = (sin(_t/180 * PI) + 1) * NUM_LEDs/2;
+      _m = (sin(_t / 180 * PI) + 1) * NUM_LEDs / 2;
       _rot = fmod(_rot + _speed, 360);
     }
 
     void draw() {
       // fadeToBlackBy(4);
       for (int i = 0; i < NUM_LEDs; i++) {
-        
+
         // outside wheel
         if (abs(i - _m) > _r)
           continue;
-        
+
         float h = _rot;//cos(_pos/180 * PI)*360;
-        
-        if(i - _m < 0) {
+
+        if (i - _m < 0) {
           h = (h + 180) > 360 ? h - 180 : h + 180;
         }
-        float s = abs(i - _m)/_r;
+        float s = abs(i - _m) / _r;
         s *= 1.1;   // make the ends c o l o r f u l
         float v = get_poti(BRIGHTNESS) / 2;
         RgbwColor col = Hsvw2Rgbw(h, s, v, 0);

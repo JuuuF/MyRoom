@@ -41,3 +41,6 @@ platformio.ini
 *.exe
 *.out
 *.app
+
+# my random data
+extra_things/

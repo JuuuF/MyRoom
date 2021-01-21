@@ -1,13 +1,13 @@
 
 
-//======================================================================
-// single-pixel functions
-
 #pragma once
 #include "utils.h"
 
 extern const int NUM_LEDs;
 extern NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip;
+
+//======================================================================
+// single-pixel functions
 
 
 /**---------------------------------------------------------------------
@@ -17,7 +17,7 @@ extern NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip;
 
   Params:
     int pixel                   pixel to write to.
-    RgbwColor color             RBW color.
+    RgbwColor color             RGBW color.
 
 */
 void addPixelColor(int pixel, RgbwColor color) {
@@ -29,6 +29,22 @@ void addPixelColor(int pixel, RgbwColor color) {
                        constrain(current.W + color.W, 0, 255)
                      );
   strip.SetPixelColor(pixel, result);
+}
+
+
+
+/**---------------------------------------------------------------------
+  setPixelColor
+
+  Set a color to a pixel. Just to be consistent with the functions.
+
+  Params:
+    int pixel                   pixel to write to.
+    RgbwColor color             RGBW color.
+
+*/
+void setPixelColor(int pixel, RgbwColor color) {
+  strip.SetPixelColor(pixel, color);
 }
 
 

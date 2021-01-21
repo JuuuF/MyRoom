@@ -13,6 +13,7 @@
 #include "led_functions.h"
 #include "utils.h"
 #include "animations.h"
+#include "pixels.h"
 
 using namespace std;
 
@@ -45,6 +46,8 @@ const int NUM_LEDs = 392;
 float MAX_MILLIAMPS = INFINITY;
 NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip(NUM_LEDs, LED_PIN);
 
+extern Pixel lamp[];
+extern int lamp_x, lamp_y;
 
 
 //----------------------------------------------------------------------
@@ -87,5 +90,40 @@ void loop() {
 
   update_inputs();
   // set_scene();
-  march_edges();
+
+  static int x = random(lamp_x);
+  static int x_dir = 1;
+  static int dx = 20;
+
+  static int y = random(lamp_x);
+  static int y_dir = 1;
+  static int dy = 20;
+
+  fadeToBlackBy(20);
+
+  // vertical bar
+  for (int i = 0; i < NUM_LEDs; i++) {
+    if (abs((lamp[i].x + lamp[i].y) - x) < dx) {
+      addPixelColor(i, RgbwColor(255, 0, 0, 0));
+    }
+    if (abs((lamp[i].x - lamp[i].y) - y) < dy) {
+      addPixelColor(i, RgbwColor(0, 0, 255, 0));
+    }
+  }
+
+  if (x >= lamp_x + lamp_y || x < 0) {
+    x_dir *= -1;
+    x += 10 * x_dir;
+  }
+  x += 10 * x_dir;
+
+  if (y >= lamp_x || y < -lamp_y) {
+    y_dir *= -1;
+    y += 10 * y_dir;
+  }
+  y += 12 * y_dir;
+
+  show();
+  delay(10);
+
 }

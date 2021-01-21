@@ -5,6 +5,7 @@
 #pragma once
 #include "led_functions.h"
 #include "utils.h"
+#include "pixels.h"
 
 using namespace std;
 
@@ -381,11 +382,8 @@ void march_edges() {
     pos += E[current_edge].a;
 
     // display
-    fadeToBlackBy(16 * get_poti(MOD));
-    addPixelColor(pos, Hsvw2Rgbw(h, 1, 1, 0));
-
-    show();
-    delay(20);
+    //fadeToBlackBy(16 * get_poti(MOD));
+    addPixelColor(pos, Hsvw2Rgbw(h, 1, 0.5, 0));
 
     // update color
     h += 4.4;
@@ -402,4 +400,80 @@ void march_edges() {
   // save the last edge
   last_edge = current_edge;
 
+}
+
+
+
+extern Pixel lamp[];
+extern int lamp_x, lamp_y;
+
+void diag_bars() {
+  static int x = random(lamp_x);
+  static int x_dir = 1;
+  static int dx = 20;
+
+  static int y = random(lamp_x);
+  static int y_dir = 1;
+  static int dy = 20;
+
+  fadeToBlackBy(10);
+
+  static float h_x = random(360);
+  static float h_y = random(360);
+
+  for (int i = 0; i < NUM_LEDs; i++) {
+    if (abs((lamp[i].x + lamp[i].y) - x) < dx) {
+      addPixelColor(i, Hsvw2Rgbw(h_x, 1, get_poti(BRIGHTNESS), 0));
+    }
+    if (abs((lamp[i].x - lamp[i].y) - y) < dy) {
+      addPixelColor(i, Hsvw2Rgbw(h_y, 1, get_poti(BRIGHTNESS), 0));
+    }
+  }
+
+  if (x >= lamp_x + lamp_y || x < 0) {
+    x_dir *= -1;
+    x += 10 * x_dir;
+    h_x = random(360);
+  }
+  x += 10 * x_dir;
+  h_x += 0.5;
+  if (h_x > 360) {
+    h_x -= 360;
+  }
+
+  if (y >= lamp_x || y < -lamp_y) {
+    y_dir *= -1;
+    y += 10 * y_dir;
+    h_y = random(360);
+  }
+  y += 12 * y_dir;
+  h_y += 0.5;
+  if (h_y > 360) {
+    h_y -= 360;
+  }
+}
+
+
+void sine_wave() {
+  static float tns = 0.3;
+  static float h = 0;
+
+  static float t = 0;
+  clear_strip();
+  for (int i = 0; i < NUM_LEDs; i++) {
+    float x = lamp[i].x / 250.0 + t;
+    float y = ((float) lamp[i].y / lamp_y) * 2 - 1;
+    if ( abs((y) - (sin(x) * 1.03)) < tns) {
+      float x_add = (float) lamp[i].x / lamp_x * 360;
+      float hue = h + x_add > 360 ? h + x_add - 360 : h + x_add;
+      strip.SetPixelColor(i, Hsvw2Rgbw(h, 1, 1, 0));
+    }
+  }
+
+
+  t += 0.04;
+  h += 0.5;
+  if (h > 360) {
+    h -= 360;
+  }
 }

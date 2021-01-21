@@ -1,3 +1,4 @@
+#pragma once
 
 struct Pixel {
   int x, y;
@@ -61,4 +62,4 @@ Pixel lamp[392] {
 };
 
 int lamp_x = 1780;
-int lamp_y = 740;/**/
+int lamp_y = 740;

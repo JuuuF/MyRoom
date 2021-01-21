@@ -18,7 +18,7 @@ extern NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip;
   Params:
     int pixel                   pixel to write to.
     RgbwColor color             RBW color.
-  
+
 */
 void addPixelColor(int pixel, RgbwColor color) {
   RgbwColor current = strip.GetPixelColor(pixel);
@@ -164,7 +164,7 @@ void addFloat(float start_point, float end_point, RgbwColor color) {
 
 /**---------------------------------------------------------------------
   fadeToBlackBy
-   
+
    Fade all lights to black by some steps.
 
    Params:
@@ -187,7 +187,7 @@ void fadeToBlackBy(uint8_t amount) {
 
 /**---------------------------------------------------------------------
   fadeToBlackRandom
-  
+
   Fade all lights to black by a random amount each. Lower and upper bounds
   can be given.
 
@@ -218,7 +218,7 @@ void fadeToBlackRandom() {
 
 /**---------------------------------------------------------------------
   multByFactor
-  
+
   Multiply all lights by some factor.
 
   Params:
@@ -241,7 +241,7 @@ void multByFactor(float factor) {
 
 /**---------------------------------------------------------------------
   clear_strip
-  
+
   Turn off all lights.
 */
 void clear_strip() {
@@ -253,38 +253,39 @@ void clear_strip() {
 
 /**---------------------------------------------------------------------
   show
-  
+
   Draw leds to strip with respect to MAX_MILLIAMPS.
   Led colors are dimmed to keep current draw under MAX_MILLIAMPS.
 
   Params:
     bool safe_mode = true       don't display if something went wrong.
                                 NOTE: will draw 12.5 mA.
-  
+
 */
 void show(bool safe_mode) {
 
-  if(MAX_MILLIAMPS != Infinity)
-  int draw = calculateMilliAmps();
-  if (draw > MAX_MILLIAMPS) {
-    // dimm all leds
-    float fac = (float) MAX_MILLIAMPS / draw;
-    multByFactor(fac * 0.95); // just to be sure
-  }
+  if (MAX_MILLIAMPS != INFINITY) {
+    int draw = calculateMilliAmps();
+    if (draw > MAX_MILLIAMPS) {
+      // dimm all leds
+      float fac = (float) MAX_MILLIAMPS / draw;
+      multByFactor(fac * 0.95); // just to be sure
+    }
 
-  // warning blink if something goes wrong
-  if (safe_mode && calculateMilliAmps() > MAX_MILLIAMPS) {
-    clear_strip();
-    for (int i = 0; i < 3; i++) {
-      setSolid(0,5,RgbwColor(32,0,0,0));
-      strip.Show();
-      delay(10);
-      setSolid(0,5,RgbwColor(0));
-      strip.Show();
-      delay(10);
+    // warning blink if something goes wrong
+    if (safe_mode && calculateMilliAmps() > MAX_MILLIAMPS) {
+      clear_strip();
+      for (int i = 0; i < 3; i++) {
+        setSolid(0, 5, RgbwColor(32, 0, 0, 0));
+        strip.Show();
+        delay(10);
+        setSolid(0, 5, RgbwColor(0));
+        strip.Show();
+        delay(10);
+      }
     }
   }
-  
+
   strip.Show();
 }
 

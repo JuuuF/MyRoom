@@ -239,9 +239,55 @@ class ColorWheel1D {
 
 
 /* =====================================================================
-  march_edges
+  march_edges animation
 
   March along edges of the lamp. This construction is tied to my physical lamp.
+*/
+
+
+/**
+   Edge class used for marching_edge().
+*/
+class Edge {
+  public:
+    const int a, b; // start & end pixel
+    const int va, vb; // start & end vertex
+    Edge(int a_, int b_, int va_, int vb_) : a(a_), b(b_), va(va_), vb(vb_) {}
+
+};
+
+/**
+   Vertex class used for march_edges().
+*/
+class Vertex {
+  public:
+    const string id;
+    const vector<int> edges;
+    const int num_edges;
+
+    Vertex(string identifier, vector<int> es) : id(identifier), edges(es), num_edges(edges.size()) {
+    }
+
+    int get_random_edge() {
+      return edges[random(num_edges)];
+    }
+
+    int get_random_edge_but_not(int e) {
+      int idx = random(num_edges);
+      if (edges[idx] == e) {
+        idx = (idx + 1) % num_edges;
+      }
+      return edges[idx];
+    }
+
+    bool contains(int n) {
+      return (find(edges.begin(), edges.end(), n) != edges.end());
+    }
+
+};
+
+/*
+   march_edges
 */
 void march_edges() {
 
@@ -357,44 +403,3 @@ void march_edges() {
   last_edge = current_edge;
 
 }
-
-/**
-   Edge class used for marching_edge().
-*/
-class Edge {
-  public:
-    const int a, b; // start & end pixel
-    const int va, vb; // start & end vertex
-    Edge(int a_, int b_, int va_, int vb_) : a(a_), b(b_), va(va_), vb(vb_) {}
-
-};
-
-/**
-   Vertex class used for march_edges().
-*/
-class Vertex {
-  public:
-    const string id;
-    const vector<int> edges;
-    const int num_edges;
-
-    Vertex(string identifier, vector<int> es) : id(identifier), edges(es), num_edges(edges.size()) {
-    }
-
-    int get_random_edge() {
-      return edges[random(num_edges)];
-    }
-
-    int get_random_edge_but_not(int e) {
-      int idx = random(num_edges);
-      if (edges[idx] == e) {
-        idx = (idx + 1) % num_edges;
-      }
-      return edges[idx];
-    }
-
-    bool contains(int n) {
-      return (find(edges.begin(), edges.end(), n) != edges.end());
-    }
-
-};

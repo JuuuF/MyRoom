@@ -245,7 +245,7 @@ void multByFactor(float factor) {
   Turn off all lights.
 */
 void clear_strip() {
-  for (uint8_t i = 0; i < NUM_LEDs; i++) {
+  for (int i = 0; i < NUM_LEDs; i++) {
     strip.SetPixelColor(i, RgbwColor(0));
   }
 }

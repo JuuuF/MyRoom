@@ -436,37 +436,9 @@ RgbwColor Hsvw2Rgbw(float H, float S, float V, float W) {
   int G = (g + m) * 255;
   int B = (b + m) * 255;
 
-  return RgbwColor(R, G, B, (int) (W*255));
+  return RgbwColor(R, G, B, (int) (W * 255));
 }
 
 
 //======================================================================
 // other functions
-
-
-
-/**---------------------------------------------------------------------
-  set_scene
-
-  Set the current cene number depending on button inputs.
-
-  Sets:
-    int SCENE                   currently selected scene.
-*/
-void set_scene() {
-
-  /*
-    if (btn_l) {
-    // left button
-    SCENE--;
-    if (SCENE < 0)
-      SCENE = SCENE_COUNT - 1;
-    }
-    if (btn_r) {
-    // right button
-    SCENE++;
-    if (SCENE >= SCENE_COUNT)
-      SCENE = 0;
-    }
-  */
-}

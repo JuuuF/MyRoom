@@ -235,3 +235,166 @@ class ColorWheel1D {
     }
 
 };
+
+
+
+/* =====================================================================
+  march_edges
+
+  March along edges of the lamp. This construction is tied to my physical lamp.
+*/
+void march_edges() {
+
+  static Edge E[25] {
+    {0, 21, 8, 0},      {22, 35, 0, 4},     {36, 48, 4, 8},     {49, 61, 8, 9},     {62, 72, 9, 4},
+    {73, 91, 4, 7},     {92, 103, 7, 9},    {104, 128, 9, 10},  {129, 140, 10, 7},  {141, 163, 7, 6},
+    {164, 175, 6, 10},  {176, 189, 10, 11}, {190, 198, 11, 6},  {199, 210, 6, 3},   {211, 232, 3, 11},
+    {233, 243, 3, 2},   {244, 257, 2, 6},   {258, 275, 6, 5},   {276, 288, 5, 2},   {289, 315, 2, 1},
+    {316, 332, 1, 5},   {333, 343, 5, 7},   {344, 365, 5, 4},   {366, 376, 4, 1},   {377, 391, 1, 0}
+  };
+
+  static Vertex V[12] {
+    {"A", vector<int>{0, 1, 24}},
+    {"B", vector<int>{19, 20, 23, 24}},
+    {"C", vector<int>{15, 16, 18, 19}},
+    {"D", vector<int>{13, 14, 15}},
+    {"E", vector<int>{1, 2, 4, 5, 22, 23}},
+    {"F", vector<int>{17, 18, 20, 21, 22}},
+    {"G", vector<int>{9, 10, 12, 13, 16, 17}},
+    {"H", vector<int>{5, 6, 8, 9, 21}},
+    {"I", vector<int>{0, 2, 3}},
+    {"J", vector<int>{3, 4, 6, 7}},
+    {"K", vector<int>{7, 8, 10, 11}},
+    {"L", vector<int>{11, 12, 14}}
+  };
+  static float h = random(360);
+
+  static int last_edge = -1;
+  static int last_pixel = -1;
+  static int dir; // 0 = down, 1 = up
+
+
+
+
+  int current_edge;
+  // choose new edge
+  if (last_edge == -1) {
+    // choose random edge + direction
+    current_edge = random(sizeof(E) / sizeof(*E));
+    dir = random(2);
+
+  } else {
+    // not initial
+
+    // get current vertex
+    int verts = sizeof(V) / sizeof(*V);
+    for (int i = 0; i < verts; i++) {
+      if (V[i].contains(last_edge) && (dir == 0 ? i == E[last_edge].va : i == E[last_edge].vb)) {
+        // choose random edge at vertex
+
+        current_edge = V[i].get_random_edge_but_not(last_edge);
+
+        // decide whether to go up or down the edge
+        if (dir > 0) {
+          // were going up -> last end vert = new start vert
+          if (E[last_edge].vb == E[current_edge].va) {
+            // go up
+            dir = 1;
+          } else {
+            // go down
+            dir = 0;
+          }
+        } else {
+          // were going down -> last start vert = new start vert
+          if (E[last_edge].va == E[current_edge].va) {
+            // go up
+            dir = 1;
+          } else {
+            // go down
+            dir = 0;
+          }
+        }
+        i = verts;
+        break;
+      }
+    }
+  }
+
+
+  // animation time!
+
+  // iterate over edge
+  int len = abs(E[current_edge].b - E[current_edge].a);
+  for (int i = 0; i <= len; i++) {
+
+    // update position
+    int pos = i;
+    if (dir == 0) {
+      pos = len - i;
+    }
+    pos += E[current_edge].a;
+
+    // display
+    fadeToBlackBy(16 * get_poti(MOD));
+    addPixelColor(pos, Hsvw2Rgbw(h, 1, 1, 0));
+
+    show();
+    delay(20);
+
+    // update color
+    h += 4.4;
+    if (h > 360) {
+      h -= 360;
+    }
+
+
+    // save the last pixel
+    if (i == len) {
+      last_pixel = pos;
+    }
+  }
+  // save the last edge
+  last_edge = current_edge;
+
+}
+
+/**
+   Edge class used for marching_edge().
+*/
+class Edge {
+  public:
+    const int a, b; // start & end pixel
+    const int va, vb; // start & end vertex
+    Edge(int a_, int b_, int va_, int vb_) : a(a_), b(b_), va(va_), vb(vb_) {}
+
+};
+
+/**
+   Vertex class used for march_edges().
+*/
+class Vertex {
+  public:
+    const string id;
+    const vector<int> edges;
+    const int num_edges;
+
+    Vertex(string identifier, vector<int> es) : id(identifier), edges(es), num_edges(edges.size()) {
+    }
+
+    int get_random_edge() {
+      return edges[random(num_edges)];
+    }
+
+    int get_random_edge_but_not(int e) {
+      int idx = random(num_edges);
+      if (edges[idx] == e) {
+        idx = (idx + 1) % num_edges;
+      }
+      return edges[idx];
+    }
+
+    bool contains(int n) {
+      return (find(edges.begin(), edges.end(), n) != edges.end());
+    }
+
+};

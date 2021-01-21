@@ -263,6 +263,8 @@ void clear_strip() {
   
 */
 void show(bool safe_mode) {
+
+  if(MAX_MILLIAMPS != Infinity)
   int draw = calculateMilliAmps();
   if (draw > MAX_MILLIAMPS) {
     // dimm all leds
@@ -282,6 +284,7 @@ void show(bool safe_mode) {
       delay(10);
     }
   }
+  
   strip.Show();
 }
 

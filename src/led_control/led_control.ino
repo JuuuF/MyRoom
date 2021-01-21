@@ -28,10 +28,10 @@ const byte BRIGHTNESS = 0;
 #define POTI_M_PIN 35
 const byte MOD = 1;
 
-#define BTN_L_PIN 32
+#define BTN_L_PIN 2
 const byte LEFT_BUTTON = 2;
 
-#define BTN_R_PIN 33
+#define BTN_R_PIN 15
 const byte RIGHT_BUTTON = 3;
 
 #define LED_PIN 22
@@ -41,9 +41,8 @@ vector<Input*> inputs;
 //----------------------------------------------------------------------
 // led settings
 
-const int NUM_LEDs = 57;
+const int NUM_LEDs = 392;
 float MAX_MILLIAMPS = INFINITY;
-
 NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip(NUM_LEDs, LED_PIN);
 
 
@@ -61,7 +60,6 @@ int SCENE_COUNT = 4;
 
 void setup()
 {
-
   randomSeed(analogRead(0));
 
   // I/O declaration
@@ -77,38 +75,17 @@ void setup()
   pinMode(LED_PIN, OUTPUT);
 
   // initialize LED strip
-  setMaxMilliamps(900);
+  //setMaxMilliamps(900);
 
   strip.Begin();
   strip.Show();
 
 }
 
+
 void loop() {
 
   update_inputs();
-  set_scene();
-
-  static BouncingBall* b1 = new BouncingBall();
-  
-  static BouncingBall* b2 = new BouncingBall();
-  b2->set_dampening(0.06);
-  b2->set_frequency(0.02);
-  b2->set_time_max(30);
-  b2->set_reversed(true);
-
-  fadeToBlackBy(get_poti(MOD) * 16);
-
-  b1->update();
-  b1->draw();
-  b2->update();
-  b2->draw();
-
-  /*
-    DrawBallBounce();
-    DrawBallBounce2();
-  */
-
-  show();
-  delay(20);
+  // set_scene();
+  march_edges();
 }

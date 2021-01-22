@@ -1,6 +1,7 @@
 
 //----------------------------------------------------------------------
 // imports
+#pragma once
 
 #include <NeoPixelBus.h>
 //#include <NeoPixelBrightnessBus.h>
@@ -14,6 +15,7 @@
 #include "utils.h"
 #include "animations.h"
 #include "pixels.h"
+#include "scenes.h"
 
 using namespace std;
 
@@ -89,41 +91,45 @@ void setup()
 void loop() {
 
   update_inputs();
-  // set_scene();
 
-  static int x = random(lamp_x);
-  static int x_dir = 1;
-  static int dx = 20;
+  int scene_change = set_scene();
 
-  static int y = random(lamp_x);
-  static int y_dir = 1;
-  static int dy = 20;
-
-  fadeToBlackBy(20);
-
-  // vertical bar
-  for (int i = 0; i < NUM_LEDs; i++) {
-    if (abs((lamp[i].x + lamp[i].y) - x) < dx) {
-      addPixelColor(i, RgbwColor(255, 0, 0, 0));
-    }
-    if (abs((lamp[i].x - lamp[i].y) - y) < dy) {
-      addPixelColor(i, RgbwColor(0, 0, 255, 0));
-    }
+  if (scene_change != 0) {
+    // scene transition using scene_change
+    clear_strip();
   }
 
-  if (x >= lamp_x + lamp_y || x < 0) {
-    x_dir *= -1;
-    x += 10 * x_dir;
-  }
-  x += 10 * x_dir;
+  static BouncingBall b1;
+  b1.set_size(20);
+  static BouncingBall b2;
+  b2.set_dampening(0.07);
+  b2.set_size(20);
+  b2.set_time_max(40);
+  b2.set_reversed(true);
 
-  if (y >= lamp_x || y < -lamp_y) {
-    y_dir *= -1;
-    y += 10 * y_dir;
+  if (SCENE == 0) {
+    fadeToBlackBy(16 * get_poti(MOD));
+    b1.update();
+    b2.update();
+    b1.draw();
+    b2.draw();
+    delay(20);
+
+  } else if (SCENE == 1) {
+    march_edges();
+
+  } else if (SCENE == 2) {
+    fadeToBlackBy(16 * get_poti(MOD));
+    diag_bars();
+    delay(20);
+
+  } else if (SCENE == 3) {
+    fadeToBlackBy(16 * get_poti(MOD));
+    sine_wave();
+    delay(10);
+
   }
-  y += 12 * y_dir;
 
   show();
-  delay(10);
 
 }

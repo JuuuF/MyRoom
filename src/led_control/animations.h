@@ -391,14 +391,18 @@ void march_edges() {
       h -= 360;
     }
 
-
     // save the last pixel
     if (i == len) {
       last_pixel = pos;
     }
+
+    fadeToBlackBy(16 * get_poti(MOD));
+    delay(20);
+    show();
   }
   // save the last edge
   last_edge = current_edge;
+
 
 }
 

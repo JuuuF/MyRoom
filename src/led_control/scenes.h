@@ -4,16 +4,20 @@
 #include "utils.h"
 #include "led_functions.h"
 
+#include <vector>
+
 extern const int NUM_LEDs;
 extern int SCENE;
 extern int SCENE_COUNT;
 
 class Scene {
-  private:
-
-
   public:
-
+    const int number;
+    //void (*update)();
+    //const void *show;
+    
+    //Scene(int scene_number, void *scene_update)
+    //  : number(scene_number), update(*scene_update) {}
 };
 
 /**---------------------------------------------------------------------
@@ -31,19 +35,15 @@ class Scene {
 */
 int set_scene() {
 
-  int prev = SCENE;
-  
   if (get_button(LEFT_BUTTON, FALLING_EDGE)) {
     // left button
-    SCENE--;
-    SCENE = constrain(SCENE, 0, SCENE_COUNT - 1);
-    return prev == SCENE ? 0 : -1;
+    SCENE = (SCENE - 1) % SCENE_COUNT;
+    return -1;
   }
   if (get_button(RIGHT_BUTTON, FALLING_EDGE)) {
     // right button
-    SCENE++;
-    SCENE = constrain(SCENE, 0, SCENE_COUNT - 1);
-    return prev == SCENE ? 0 : 1;
+    SCENE = (SCENE + 1) % SCENE_COUNT;
+    return 1;
   }
   
   return 0;

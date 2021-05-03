@@ -3,15 +3,77 @@
 // animations
 
 #pragma once
+
 #include "led_functions.h"
 #include "utils.h"
 #include "pixels.h"
 
 using namespace std;
 
+// util variables
 extern const int NUM_LEDs;
 
+// lamp variables
+extern Pixel lamp[];
+extern int lamp_x, lamp_y;
+
+// enumerations
 extern const byte BRIGHTNESS, MOD, LEFT_BUTTON, RIGHT_BUTTON;
+
+
+void random_function() {
+
+}
+
+void draw() {
+  static int _t = 0;
+  _t++;
+  _t %= NUM_LEDs;
+  fadeToBlackBy(16);
+  setPixelColor(_t, RgbwColor(64));
+}
+
+class Animation {
+
+  public:
+    void(*update)();            // update the animation state
+    void(*draw)();              // draw the animation
+
+    Animation() {}
+
+    Animation(void(*update_function)()/*, void(*draw_function)()*/)
+      : update(update_function) {
+      /*, draw(draw_function)*/
+    }
+
+};
+
+class Test_animation { /*: Animation*/
+  private:
+    int _t;
+
+  public:
+
+    void update_anim() {
+      _t++;
+      _t %= NUM_LEDs;
+    }
+
+    void draw_anim() {
+      fadeToBlackBy(16);
+      setPixelColor(_t, RgbwColor(64));
+    }
+
+    Test_animation() {
+      //Animation(draw);
+      _t = random(NUM_LEDs);
+    }
+};
+
+
+
+
+
 
 void DrawPingPong() {
   static float block_len = 3.0;
@@ -206,7 +268,7 @@ class ColorWheel1D {
     }
 
 
-    void update() {
+    void refresh() {
       float d = _dt; // * get_poti(MOD);
       _t = (_t + d < 360) ? _t + d - 360 : _t + d;
       _m = (sin(_t / 180 * PI) + 1) * NUM_LEDs / 2;
@@ -396,7 +458,7 @@ void march_edges() {
       last_pixel = pos;
     }
 
-    fadeToBlackBy(16 * get_poti(MOD));
+    fadeToBlackBy(16);
     delay(20);
     show();
   }
@@ -406,10 +468,6 @@ void march_edges() {
 
 }
 
-
-
-extern Pixel lamp[];
-extern int lamp_x, lamp_y;
 
 void diag_bars() {
   static int x = random(lamp_x);
@@ -427,10 +485,10 @@ void diag_bars() {
 
   for (int i = 0; i < NUM_LEDs; i++) {
     if (abs((lamp[i].x + lamp[i].y) - x) < dx) {
-      addPixelColor(i, Hsvw2Rgbw(h_x, 1, get_poti(BRIGHTNESS), 0));
+      addPixelColor(i, Hsvw2Rgbw(h_x, 1, get_poti(MOD), 0));
     }
     if (abs((lamp[i].x - lamp[i].y) - y) < dy) {
-      addPixelColor(i, Hsvw2Rgbw(h_y, 1, get_poti(BRIGHTNESS), 0));
+      addPixelColor(i, Hsvw2Rgbw(h_y, 1, get_poti(MOD), 0));
     }
   }
 

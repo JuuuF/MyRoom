@@ -10,14 +10,16 @@ extern const int NUM_LEDs;
 extern int SCENE;
 extern int SCENE_COUNT;
 
+typedef void(*void_function)();
+
 class Scene {
   public:
     const int number;
-    //void (*update)();
+    void_function update;
     //const void *show;
     
-    //Scene(int scene_number, void *scene_update)
-    //  : number(scene_number), update(*scene_update) {}
+    Scene(int scene_number, void (*scene_update)())
+      : number(scene_number), update(scene_update) {}
 };
 
 /**---------------------------------------------------------------------

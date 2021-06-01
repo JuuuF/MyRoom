@@ -8,14 +8,16 @@
 //#include <NeoPixelSegmentBus.h>
 //#include <NeoPixelAnimator.h>
 
-#include <vector>
-#include <tuple>
+#include <EEPROM.h>
 
+#include <vector>
+// #include <tuple>
+
+#include "macros.h"
 #include "led_functions.h"
 #include "utils.h"
 #include "animations.h"
 #include "pixels.h"
-#include "scenes.h"
 
 using namespace std;
 
@@ -25,26 +27,19 @@ using namespace std;
 // I/O
 
 
-#define POTI_B_PIN 34
-const byte BRIGHTNESS = 0;
+float BRIGHTNESS = 0, MOD = 0;
+bool LEFT_BUTTON, RIGHT_BUTTON;
 
-#define POTI_M_PIN 35
-const byte MOD = 1;
+const float INPUT_SMOOTHING = 0.85;
 
-#define BTN_L_PIN 2
-const byte LEFT_BUTTON = 2;
 
-#define BTN_R_PIN 15
-const byte RIGHT_BUTTON = 3;
+// vector<Input*> inputs;
 
-#define LED_PIN 22
-
-vector<Input*> inputs;
 
 //----------------------------------------------------------------------
 // led settings
 
-const int NUM_LEDs = 392;
+// #define NUM_LEDs 392;
 float MAX_MILLIAMPS = INFINITY;
 NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip(NUM_LEDs, LED_PIN);
 
@@ -55,9 +50,12 @@ extern int lamp_x, lamp_y;
 //----------------------------------------------------------------------
 // utils
 
-int SCENE = 0;
-int SCENE_COUNT = 4;
 
+vector<Animation*> animations;
+
+uint8_t ACTIVE_ANIMATION = 0;       // currently active animation // TODO: export into flash
+uint8_t ANIMATION_COUNT;            // amount of animations
+int8_t ANIMATION_TRANSITION = 0;    // direction change, values [-1, 0, 1]
 
 
 //======================================================================
@@ -65,33 +63,53 @@ int SCENE_COUNT = 4;
 
 void setup()
 {
+  Serial.begin(115200);
+  
   randomSeed(analogRead(0));
 
   // I/O declaration
 
-  vector<tuple<int, int, byte>> input_values = {
-    make_tuple(POTI, POTI_B_PIN, BRIGHTNESS),
-    make_tuple(POTI, POTI_M_PIN, MOD),
-    make_tuple(BUTTON, BTN_L_PIN, LEFT_BUTTON),
-    make_tuple(BUTTON, BTN_R_PIN, RIGHT_BUTTON)
-  };
-  inputs = set_inputs(input_values);
+  EEPROM.begin(EEPROM_SIZE);
+
+  // vector<tuple<int, int, byte>> input_values = {
+  //   make_tuple(POTI, POTI_B_PIN, BRIGHTNESS),
+  //   make_tuple(POTI, POTI_M_PIN, MOD),
+  //   make_tuple(BUTTON, BTN_L_PIN, LEFT_BUTTON),
+  //   make_tuple(BUTTON, BTN_R_PIN, RIGHT_BUTTON)
+  // };
+  // inputs = set_inputs(input_values);
+  pinMode(POTI_B_PIN, INPUT);
+  pinMode(POTI_M_PIN, INPUT);
+  pinMode(BTN_L_PIN, INPUT_PULLUP);
+  pinMode(BTN_R_PIN, INPUT_PULLUP);
 
   pinMode(LED_PIN, OUTPUT);
 
   // initialize LED strip
   //setMaxMilliamps(900);
 
+  // set animations
+  animations.push_back(new PlainWhite());
+  animations.push_back(new BlueLight());
+  animations.push_back(new DiagBars());
+
+  ANIMATION_COUNT = animations.size();
+  ACTIVE_ANIMATION = EEPROM.read(0);
+
   strip.Begin();
   strip.Show();
+  Serial.println("END SETUP");
 
 }
 
 
 void loop() {
-
+  static unsigned long frame_start = millis();
+  static unsigned long frame_time;
+  
   update_inputs();
 
+  /*
   int scene_change = set_scene();
 
   if (scene_change != 0) {
@@ -114,7 +132,6 @@ void loop() {
     b1.draw();
     b2.draw();
     delay(20);
-
   } else if (SCENE == 1) {
     march_edges();
 
@@ -129,7 +146,37 @@ void loop() {
     delay(10);
 
   }
+  */
+  
+  
 
+
+
+
+  
+  // draw current animation
+  animations[ACTIVE_ANIMATION]->update();
+  animations[ACTIVE_ANIMATION]->draw();
+
+  // (possibly) fade to other animation
+  if (ANIMATION_TRANSITION == 0) {
+    // only update scene transitions when none are happening
+    update_animation_params();
+  } else {
+    animation_transition(
+      animations[(ACTIVE_ANIMATION + ANIMATION_TRANSITION + ANIMATION_COUNT) % ANIMATION_COUNT]
+    );
+  }
+
+  // stop. wait a minute.
   show();
+
+  frame_time = millis() - frame_start;
+  if(frame_time < 25) {
+    delay(25 - frame_time);
+  }
+  frame_start = millis();
+  // Serial.printf("frame time: %d\ndelay: %d\n\n", frame_time, 25-frame_time);
+
 
 }

@@ -3,7 +3,8 @@
 #pragma once
 #include "utils.h"
 
-extern const int NUM_LEDs;
+// extern const uint16_t NUM_LEDs;
+// extern NUM_LEDs
 extern NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> strip;
 
 //======================================================================
@@ -185,6 +186,7 @@ void addFloat(float start_point, float end_point, RgbwColor color) {
 
    Params:
     uint8_t amount              amount of steps to reduce color values.
+    RgbwColor* scene [optional] scene to fade instead of led strip.
 */
 void fadeToBlackBy(uint8_t amount) {
   for (int i = 0; i < NUM_LEDs; i++) {
@@ -196,6 +198,14 @@ void fadeToBlackBy(uint8_t amount) {
                             max(0, current.W - amount)
                           );
     strip.SetPixelColor(i, new_color);
+  }
+}
+void fadeToBlackBy(uint8_t amount, RgbwColor* scene) {
+  for (uint16_t i = 0; i < NUM_LEDs; i++) {
+    scene[i].R = max(0, scene[i].R - amount);
+    scene[i].G = max(0, scene[i].G - amount);
+    scene[i].B = max(0, scene[i].B - amount);
+    scene[i].W = max(0, scene[i].W - amount);
   }
 }
 

@@ -1,13 +1,21 @@
-#pragma once
 
+/** ===========================================================================
+  pixels.h
+
+  This file contains the parameters for the lamp. Yes, I actually put these
+  values in manually.
+
+  This file provides:
+    Pixel lamp[NUM_LEDs]            lamp pixel coordinates
+    uint16_t lamp_x                 max x coordinate of lamp
+    uint16_t lamp_y                 max y coordinate of lamp
+*/
+#pragma once
 struct Pixel {
-  int x, y;
-  Pixel(int x_, int y_) : x(x_), y(y_) {}
+  uint16_t x, y;
+  Pixel(uint16_t x_, uint16_t y_) : x(x_), y(y_) {}
 };
 
-/*
-   Yes, I actually put these in manually.
-*/
 Pixel lamp[392] {
   // 0
   Pixel(0, 730), Pixel(0, 698), Pixel(0, 662), Pixel(0, 628), Pixel(0, 596), Pixel(0, 562), Pixel(0, 528), Pixel(0, 492), Pixel(0, 460), Pixel(0, 426), Pixel(0, 392), Pixel(0, 358), Pixel(0, 324), Pixel(0, 290), Pixel(0, 258), Pixel(0, 222), Pixel(0, 190), Pixel(0, 156), Pixel(0, 122), Pixel(0, 88), Pixel(0, 54), Pixel(0, 20),
@@ -61,5 +69,5 @@ Pixel lamp[392] {
   Pixel(482, 0), Pixel(449, 0), Pixel(416, 0), Pixel(383, 0), Pixel(349, 0), Pixel(316, 0), Pixel(283, 0), Pixel(248, 0), Pixel(215, 0), Pixel(181, 0), Pixel(146, 0), Pixel(112, 0), Pixel(78, 0), Pixel(42, 0), Pixel(6, 0)
 };
 
-int lamp_x = 1780;
-int lamp_y = 740;
+uint16_t lamp_x = 1780;
+uint16_t lamp_y = 740;

@@ -1,6 +1,12 @@
 
-//----------------------------------------------------------------
-// animations
+/** ===========================================================================
+  animations.h
+
+  This file handles all animations.
+  Animations implement the (pure) virtual functions of the Animation class.
+  This includes an update function, a draw function and optionally a getState
+  function, which writes the current animation state to a given buffer.
+*/
 
 #pragma once
 
@@ -10,29 +16,27 @@
 
 using namespace std;
 
-// util variables
-// extern const uint16_t NUM_LEDs;
-
-// lamp variables
+/* lamp variables */
 extern Pixel lamp[];
-extern int lamp_x, lamp_y;
+extern uint16_t lamp_x, lamp_y;
 
-// I/O
+/* I/O variables */
 extern float BRIGHTNESS, MOD;
 extern bool LEFT_BUTTON, RIGHT_BUTTON;
 
-// animation variables
+/* animation variables */
 extern uint8_t ACTIVE_ANIMATION;
 extern uint8_t ANIMATION_COUNT;
 extern int8_t ANIMATION_TRANSITION;
 
 
-/** ====================================================================
+/** ===========================================================================
   Animation
 
   This interface class functions as a building block for animations.
-  It supplies pure virtual functions to update, show and return the
-  animation that have to be implemented for each animaiton accordingly.
+  It provides pure virtual functions to update and draw the animation that have
+  to be implemented for each animaiton accordingly. Additionally it provides
+  an optional function to write the current animation state to a buffer.
  */
 class Animation
 {
@@ -42,10 +46,12 @@ class Animation
     /* draw state to led strip */
     virtual void draw() = 0;
     /* get the current state as RgbwColor array of size NUM_LEDs */
-    virtual void getState(RgbwColor* buffer) = 0;
+    virtual void getState(RgbwColor* buffer) { }
 };
 
-/** ====================================================================
+
+
+/** ===========================================================================
   PlainWhite
 
   Plain white scene.
@@ -110,7 +116,7 @@ class PlainWhite : public Animation
     void getState(RgbwColor* buffer) override
     {
       RgbwColor color = _get_color();
-      for (int i = 0; i < NUM_LEDs; i++) {
+      for (uint16_t i = 0; i < NUM_LEDs; i++) {
         buffer[i] = color;
       }
     }
@@ -119,13 +125,15 @@ class PlainWhite : public Animation
 /** ====================================================================
   HueLight
 
-  Plain white scene.
-  Can be modified to change brightness and color temperature.
+  Visualisation of the HSV color space. Saturation is set to 1.
+
+  BRIGHTNESS controls value
+  MOD controls hue
 */
-class BlueLight : public Animation
+class HueLight : public Animation
 {
   public:
-    BlueLight() {}
+    HueLight() {}
 
     void update() override {}
 
@@ -142,6 +150,18 @@ class BlueLight : public Animation
     }
 };
 
+
+
+// TODO: convert to floating point operations
+// TODO: and maybe improve overall
+/** ====================================================================
+  DiagBars
+
+  Two diagonal bars of random colors going ham.
+
+  BRIGHTNESS controls brightness
+  MOD controls speed
+*/
 class DiagBars : public Animation
 {
   private:
@@ -195,10 +215,10 @@ class DiagBars : public Animation
       fadeToBlackBy(10);
       for (int i = 0; i < NUM_LEDs; i++) {
         if (abs((lamp[i].x + lamp[i].y) - _x) < _dx) {
-          addPixelColor(i, Hsvw2Rgbw(_hue_x, 1, BRIGHTNESS, 0));
+          addPixel(i, Hsvw2Rgbw(_hue_x, 1, BRIGHTNESS, 0));
         }
         if (abs((lamp[i].x - lamp[i].y) - _y) < _dy) {
-          addPixelColor(i, Hsvw2Rgbw(_hue_y, 1, BRIGHTNESS, 0));
+          addPixel(i, Hsvw2Rgbw(_hue_y, 1, BRIGHTNESS, 0));
         }
       }
     }
@@ -273,11 +293,10 @@ void update_animation_params() {
 
 */
 void animation_transition(Animation* next_animation) {
-  static bool ongoing = false;              // current state of transition
-  static RgbwColor animation_buffer[392];   // new animation
-  static RgbwColor transition_buffer[392];  // transition animation
-  static bool mask[392];                    // transition mask: false = old, true = new
-  // TODO: change to NUM_LEDs, but there's something fishy
+  static bool ongoing = false;                    // current state of transition
+  static RgbwColor animation_buffer[NUM_LEDs];    // new animation
+  static RgbwColor transition_buffer[NUM_LEDs];   // transition animation
+  static bool mask[NUM_LEDs];                     // transition mask: false = old, true = new
 
   /* transition variables */
   static float t_pos = 0;
@@ -315,11 +334,11 @@ void animation_transition(Animation* next_animation) {
 
     // draw new animation
     if (mask[i]) {
-      setPixelColor(i, animation_buffer[i]);
+      setPixel(i, animation_buffer[i]);
     }
 
     // add transition bar
-    addPixelColor(i, transition_buffer[i]);
+    addPixel(i, transition_buffer[i]);
   }
 
   if(buffer_empty(transition_buffer)) {
@@ -571,7 +590,7 @@ void animation_transition(Animation* next_animation) {
 //         s *= 1.1;   // make the ends c o l o r f u l
 //         float v = BRIGHTNESS / 2;
 //         RgbwColor col = Hsvw2Rgbw(h, s, v, 0);
-//         addPixelColor(i, col);
+//         addPixel(i, col);
 //         //strip.SetPixelColor(i, col);
 //       }
 //     }
@@ -724,7 +743,7 @@ void animation_transition(Animation* next_animation) {
 
 //     // display
 //     //fadeToBlackBy(16 * get_poti(MOD));
-//     addPixelColor(pos, Hsvw2Rgbw(h, 1, 0.5, 0));
+//     addPixel(pos, Hsvw2Rgbw(h, 1, 0.5, 0));
 
 //     // update color
 //     h += 4.4;
@@ -764,10 +783,10 @@ void animation_transition(Animation* next_animation) {
 
 //   for (int i = 0; i < NUM_LEDs; i++) {
 //     if (abs((lamp[i].x + lamp[i].y) - x) < _dx) {
-//       // addPixelColor(i, Hsvw2Rgbw(_hue_x, 1, get_poti(MOD), 0));
+//       // addPixel(i, Hsvw2Rgbw(_hue_x, 1, get_poti(MOD), 0));
 //     }
 //     if (abs((lamp[i].x - lamp[i].y) - y) < _dy) {
-//       // addPixelColor(i, Hsvw2Rgbw(_hue_y, 1, get_poti(MOD), 0));
+//       // addPixel(i, Hsvw2Rgbw(_hue_y, 1, get_poti(MOD), 0));
 //     }
 //   }
 

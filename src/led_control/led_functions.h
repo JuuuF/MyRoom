@@ -225,7 +225,7 @@ void addFloat(RgbwColor color) {
     RgbwColor* buffer               scene to fade instead of led strip
 */
 void fadeToBlackBy(uint8_t amount) {
-  for (uint8_t i = 0; i < NUM_LEDs; i++) {
+  for (uint16_t i = 0; i < NUM_LEDs; i++) {
     RgbwColor current = strip.GetPixelColor(i);
     RgbwColor new_color = RgbwColor(
                             max(0, current.R - amount),

@@ -101,6 +101,8 @@ class Edge
     uint16_t get_start() { return _start; }
 
     uint16_t get_end() { return _end; }
+
+    uint8_t get_length() { return _end - _start; }
 };
 
 

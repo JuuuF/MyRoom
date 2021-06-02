@@ -134,11 +134,11 @@ void setFloat(float start_point, float end_point, RgbwColor color) {
   end_point   = constrain(end_point,   0, NUM_LEDs);
 
   // first segment
-  float first_seg_length = min(end_point - start_point, start_point - (uint8_t) start_point);
+  float first_seg_length = min(end_point - start_point, start_point - (uint16_t) start_point);
   uint8_t dim = 255 * (1 - first_seg_length);
-  setPixel((uint8_t) start_point, RgbwColor(color.Dim(dim)));
+  setPixel((uint16_t) start_point, RgbwColor(color.Dim(dim)));
 
-  if (end_point - start_point < start_point - (uint8_t) start_point) {
+  if (end_point - start_point < start_point - (uint16_t) start_point) {
     // segment only on one pixel
     return;
   }
@@ -148,9 +148,9 @@ void setFloat(float start_point, float end_point, RgbwColor color) {
 
 
   // last segment
-  dim = 255 * (end_point - (uint8_t) end_point);
+  dim = 255 * (end_point - (uint16_t) end_point);
   RgbwColor res_color = color.Dim(dim);
-  setPixel((uint8_t) end_point, res_color);
+  setPixel((uint16_t) end_point, res_color);
 }
 
 void setFloat(float end_point, RgbwColor color) {
@@ -168,7 +168,7 @@ void setFloat(RgbwColor color) {
   addFloat
 
   Set a floating block of pixels to a given color.
-  In contrast to addSolid(), this methos uses floating point boundaries.
+  In contrast to addSolid(), this function uses floating point boundaries.
   If no start point is given, 0 is assumed.
   If neither start nor end are given, the whole strip is affected.
 
@@ -180,11 +180,11 @@ void setFloat(RgbwColor color) {
 void addFloat(float start_point, float end_point, RgbwColor color) {
 
   // first segment
-  float first_seg_length = min(end_point - start_point, start_point - (uint8_t) start_point);
+  float first_seg_length = min(end_point - start_point, start_point - (uint16_t) start_point);
   uint8_t dim = 255 * (1 - first_seg_length);
-  addPixel((uint8_t) start_point, RgbwColor(color.Dim(dim)));
+  addPixel((uint16_t) start_point, RgbwColor(color.Dim(dim)));
 
-  if (end_point - start_point < start_point - (uint8_t) start_point) {
+  if (end_point - start_point < start_point - (uint16_t) start_point) {
     // segment only on one pixel
     return;
   }
@@ -194,9 +194,9 @@ void addFloat(float start_point, float end_point, RgbwColor color) {
 
 
   // last segment
-  dim = 255 * (end_point - (uint8_t) end_point);
+  dim = 255 * (end_point - (uint16_t) end_point);
   RgbwColor res_color = color.Dim(dim);
-  addPixel((uint8_t) end_point, res_color);
+  addPixel((uint16_t) end_point, res_color);
 }
 
 void addFloat(float end_point, RgbwColor color) {

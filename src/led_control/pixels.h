@@ -5,10 +5,15 @@
   This file contains the parameters for the lamp. Yes, I actually put these
   values in manually.
 
+  The init_lamp() function call is mandatory to be called if the use of edges
+  and vertices is desires.
+
   This file provides:
     Pixel lamp[NUM_LEDs]            lamp pixel coordinates
     uint16_t lamp_x                 max x coordinate of lamp
     uint16_t lamp_y                 max y coordinate of lamp
+    Vertex V[]                      physical lamp vertices
+    Edge E[]                        physical lamp edges
 */
 
 #pragma once
@@ -73,9 +78,6 @@ Pixel lamp[392] {
 
 uint16_t lamp_x = 1780;
 uint16_t lamp_y = 740;
-
-#define EDGE_START true
-#define EDGE_END   false
 
 
 /** -----------------------------------------------------------------
@@ -171,6 +173,16 @@ Edge E[] {
 
 Vertex V[12];
 
+#define EDGE_START true
+#define EDGE_END   false
+
+/**
+  init_lamp
+
+  Initialize the lamp parameters. This only includes vertex initialization as
+  they are weird to work with. My current C++ knowledge does not allow me to
+  do it elegantly else.
+*/
 void init_lamp() {
   V[0] = Vertex();
   V[0].add(E[0], EDGE_END);

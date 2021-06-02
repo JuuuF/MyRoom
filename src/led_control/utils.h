@@ -17,6 +17,8 @@ extern const float INPUT_SMOOTHING;
 extern float BRIGHTNESS, MOD;
 extern bool LEFT_BUTTON, RIGHT_BUTTON;
 
+#define ARRAY_SIZE(arr) (uint16_t) (*(&arr + 1) - arr)
+
 using namespace std;
 
 

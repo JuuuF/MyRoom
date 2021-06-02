@@ -152,8 +152,6 @@ class HueLight : public Animation
 
 
 
-// TODO: convert to floating point operations
-// TODO: and maybe improve overall
 /** ====================================================================
   DiagBars
 
@@ -167,21 +165,23 @@ class DiagBars : public Animation
   private:
     int _x, _x_dir, _dx;
     int _y, _y_dir, _dy;
+    float _hue_x, _sat_x, _hue_y, _sat_y;
     int _speed;
-    float _hue_x, _hue_y;
 
   public:
-    DiagBars() {
-      _x = random(lamp_x);
-      _x_dir = 1;
-      _dx = 30;
-      _y = random(lamp_x);
-      _y_dir = 1;
-      _dy = 30;
-      _hue_x = random(360);
-      _hue_y = random(360);
-      _speed = analogRead(POTI_M_PIN) / 4096.0 * 20;
-    }
+    DiagBars() :
+      _x(random(lamp_x)),
+      _x_dir(1),
+      _dx(50),
+      _y(random(lamp_x)),
+      _y_dir(1),
+      _dy(50),
+      _hue_x(random(360)),
+      _sat_x((random(50)/50.0) + 25),
+      _hue_y(random(360)),
+      _sat_y((random(50)/50.0) + 25),
+      _speed(analogRead(POTI_M_PIN) / 4096.0 * 20)
+    { }
 
     void update() override
     {
@@ -191,6 +191,7 @@ class DiagBars : public Animation
         _x_dir *= -1;
         _x += _speed * _x_dir;
         _hue_x = random(360);
+        _sat_x = (random(50)/50.0) + 25;
       }
       _x += _speed * _x_dir;
       _hue_x += 0.5;
@@ -202,6 +203,7 @@ class DiagBars : public Animation
         _y_dir *= -1;
         _y += _speed * 1.1 * _y_dir;
         _hue_y = random(360);
+        _sat_y = (random(50)/50.0) + 25;
       }
       _y += _speed * 1.1 * _y_dir;
       _hue_y += 0.5;
@@ -213,12 +215,20 @@ class DiagBars : public Animation
     void draw() override
     {
       fadeToBlackBy(10);
+      float dist;
+      float wave_fac;
       for (int i = 0; i < NUM_LEDs; i++) {
-        if (abs((lamp[i].x + lamp[i].y) - _x) < _dx) {
-          addPixel(i, Hsvw2Rgbw(_hue_x, 1, BRIGHTNESS, 0));
+        // first bar
+        dist = abs((lamp[i].x + lamp[i].y) - _x);
+        if (dist < _dx) {
+          wave_fac = 1 - (dist / _dx);
+          addPixel(i, Hsvw2Rgbw(_hue_x, _sat_x, BRIGHTNESS * wave_fac, 0));
         }
-        if (abs((lamp[i].x - lamp[i].y) - _y) < _dy) {
-          addPixel(i, Hsvw2Rgbw(_hue_y, 1, BRIGHTNESS, 0));
+        // second bar
+        dist = abs((lamp[i].x - lamp[i].y) - _y);
+        if (dist < _dy) {
+          wave_fac = 1 - (dist / _dy);
+          addPixel(i, Hsvw2Rgbw(_hue_y, _sat_y, BRIGHTNESS * wave_fac, 0));
         }
       }
     }
@@ -316,6 +326,10 @@ void animation_transition(Animation* next_animation) {
     t_pos = 0; //ANIMATION_TRANSITION < 0 ? lamp_x : 0;
   }
 
+  // get new animation state
+  next_animation->update();
+  next_animation->getState(animation_buffer);
+
   // update params
   t_pos += t_delta;
 
@@ -352,11 +366,6 @@ void animation_transition(Animation* next_animation) {
     EEPROM.write(0, ACTIVE_ANIMATION);
     EEPROM.commit();
   }
-
-
-  // get new animation state
-  next_animation->update();
-  next_animation->getState(animation_buffer);
 
 }
 

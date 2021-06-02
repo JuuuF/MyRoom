@@ -72,7 +72,7 @@ void setup()
   animations.push_back(new DiagBars());
 
   ANIMATION_COUNT = animations.size();
-  ACTIVE_ANIMATION = EEPROM.read(0);
+  ACTIVE_ANIMATION = EEPROM.read(0) % ANIMATION_COUNT;
 
   /* led setup */
   strip.Begin();

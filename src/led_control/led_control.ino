@@ -66,6 +66,9 @@ void setup()
 
   EEPROM.begin(EEPROM_SIZE);
 
+  /* set lamp parameters */
+  init_lamp();
+
   /* set animations */
   animations.push_back(new PlainWhite());
   animations.push_back(new HueLight());

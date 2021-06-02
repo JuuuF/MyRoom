@@ -10,7 +10,9 @@
     uint16_t lamp_x                 max x coordinate of lamp
     uint16_t lamp_y                 max y coordinate of lamp
 */
+
 #pragma once
+
 struct Pixel {
   uint16_t x, y;
   Pixel(uint16_t x_, uint16_t y_) : x(x_), y(y_) {}
@@ -71,3 +73,176 @@ Pixel lamp[392] {
 
 uint16_t lamp_x = 1780;
 uint16_t lamp_y = 740;
+
+#define EDGE_START true
+#define EDGE_END   false
+
+
+/** -----------------------------------------------------------------
+  Edge
+
+  Description of an edge inside the lamp. An edge consists of a start index and
+  an end index, start <= end.
+  Both points are included in the edge.
+*/
+class Edge
+{
+  private:
+    uint16_t _start, _end;           // start and end pixel indices
+
+  public:
+    Edge(uint16_t start, uint16_t end) :
+      _start(min(start, end)),
+      _end(  max(start, end))
+    {}
+
+    uint16_t get_start() { return _start; }
+
+    uint16_t get_end() { return _end; }
+};
+
+
+
+/** -----------------------------------------------------------------
+  Vertex
+
+  Description of a vertex inside the lamp.
+  A vertex consists of end points of multiple edges.
+*/
+class Vertex
+{
+  private:
+    vector<Edge> _edges;            // adjacent edges
+    vector<uint16_t> _indices;      // according indices
+    uint8_t _size;                  // amount of adjacent edges
+
+  public:
+    Vertex() : _size(0) {}
+
+    /**
+      addEdge
+
+      Add a new edge point to the vertex.
+
+      Parameters:
+        Edge e                      Edge object
+        bool start                  true: add edge start, else end
+    */
+    void add(Edge e, bool start)
+    {
+      _edges.push_back(e);
+      _indices.push_back(start ? e.get_start() : e.get_end());
+      _size++;
+    }
+
+    /* getter */
+    vector<Edge> get_edges() { return _edges; }
+    vector<uint16_t> get_indices() { return _indices; }
+    uint8_t get_size() { return _size; }
+};
+
+Edge E[] {
+  Edge(0,21),
+  Edge(22,35),
+  Edge(36,48),
+  Edge(49,61),
+  Edge(62,72),
+  Edge(73,91),
+  Edge(92,103),
+  Edge(104,128),
+  Edge(129,140),
+  Edge(141,163),
+  Edge(164,175),
+  Edge(176,189),
+  Edge(190,198),
+  Edge(199,210),
+  Edge(211,232),
+  Edge(233,243),
+  Edge(244,257),
+  Edge(258,275),
+  Edge(276,288),
+  Edge(289,315),
+  Edge(316,332),
+  Edge(333,343),
+  Edge(344,365),
+  Edge(366,376),
+  Edge(377,391)
+};
+
+Vertex V[12];
+
+void init_lamp() {
+  V[0] = Vertex();
+  V[0].add(E[0], EDGE_END);
+  V[0].add(E[1], EDGE_START);
+  V[0].add(E[24], EDGE_END);
+
+  V[1] = Vertex();
+  V[1].add(E[19], EDGE_END);
+  V[1].add(E[20], EDGE_START);
+  V[1].add(E[23], EDGE_END);
+  V[1].add(E[24], EDGE_START);
+
+  V[2] = Vertex();
+  V[2].add(E[15], EDGE_END);
+  V[2].add(E[16], EDGE_START);
+  V[2].add(E[18], EDGE_END);
+  V[2].add(E[19], EDGE_START);
+
+  V[3] = Vertex();
+  V[3].add(E[13], EDGE_END);
+  V[3].add(E[14], EDGE_START);
+  V[3].add(E[15], EDGE_START);
+
+  V[4] = Vertex();
+  V[4].add(E[1], EDGE_END);
+  V[4].add(E[2], EDGE_START);
+  V[4].add(E[4], EDGE_END);
+  V[4].add(E[5], EDGE_START);
+  V[4].add(E[22], EDGE_END);
+  V[4].add(E[23], EDGE_START);
+
+  V[5] = Vertex();
+  V[5].add(E[17], EDGE_END);
+  V[5].add(E[18], EDGE_START);
+  V[5].add(E[20], EDGE_END);
+  V[5].add(E[21], EDGE_START);
+  V[5].add(E[22], EDGE_START);
+
+  V[6] = Vertex();
+  V[6].add(E[9], EDGE_END);
+  V[6].add(E[10], EDGE_START);
+  V[6].add(E[12], EDGE_END);
+  V[6].add(E[13], EDGE_START);
+  V[6].add(E[16], EDGE_END);
+  V[6].add(E[17], EDGE_START);
+
+  V[7] = Vertex();
+  V[7].add(E[5], EDGE_END);
+  V[7].add(E[6], EDGE_START);
+  V[7].add(E[8], EDGE_END);
+  V[7].add(E[9], EDGE_START);
+  V[7].add(E[21], EDGE_END);
+
+  V[8] = Vertex();
+  V[8].add(E[0], EDGE_START);
+  V[8].add(E[2], EDGE_END);
+  V[8].add(E[3], EDGE_START);
+
+  V[9] = Vertex();
+  V[9].add(E[3], EDGE_END);
+  V[9].add(E[4], EDGE_START);
+  V[9].add(E[6], EDGE_END);
+  V[9].add(E[7], EDGE_START);
+
+  V[10] = Vertex();
+  V[10].add(E[7], EDGE_END);
+  V[10].add(E[8], EDGE_START);
+  V[10].add(E[10], EDGE_END);
+  V[10].add(E[11], EDGE_START);
+
+  V[11] = Vertex();
+  V[11].add(E[11], EDGE_END);
+  V[11].add(E[12], EDGE_START);
+  V[11].add(E[14], EDGE_END);
+}

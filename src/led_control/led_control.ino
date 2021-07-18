@@ -73,7 +73,8 @@ void setup()
   animations.push_back(new PlainWhite());
   animations.push_back(new HueLight());
   animations.push_back(new DiagBars());
-  animations.push_back(new MarchEdges());
+  animations.push_back(new EdgeColors());
+  // animations.push_back(new MarchEdges());
 
   ANIMATION_COUNT = animations.size();
   ACTIVE_ANIMATION = EEPROM.read(0) % ANIMATION_COUNT;

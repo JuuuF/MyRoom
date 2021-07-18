@@ -55,7 +55,9 @@ class Animation
     virtual void getState(RgbwColor* buffer) { }
 };
 
-
+// TODO: merge draw() and getState(buffer) into draw(buffer) with NULL-check on buffer
+// NOTE: MAY result in funny behavior on transition change if not implemented
+// ALTERNATIVE: add apply_color(buffer) function with NULL-check-logic (maybe inline?)
 
 /* ========================================================================= */
 /* animations */
@@ -264,6 +266,100 @@ class DiagBars : public Animation
           buffer[i].W = min(buffer[i].W + col.W, 255);
         }
       }
+    }
+};
+
+
+
+class EdgeColors : public Animation
+{
+  private:
+    uint16_t _transition_steps;
+    uint16_t _transition_progress;
+    uint8_t _transitioning;
+    RgbwColor _start_color, _dst_color;
+    RgbwColor _edge_colors[4]; // 0: 0,0; 1: x,0; 2: x,y; 3: 0,y
+    // 0 base, 1,2,3 diffs to 0 (over-/underflow considered!)
+
+  public:
+    EdgeColors() :
+      _transition_steps(MOD * 1000),     // 0 - 25s
+      _transition_progress(0),
+      _transitioning(0),
+      _dst_color(random_hsvw_color())
+    {
+      for (RgbwColor c : _edge_colors) {
+        c = random_hsvw_color();
+      }
+      _start_color = _edge_colors[_transitioning];
+    }
+
+    void update() override
+    {
+      _transition_progress++;
+      float fac = min((float) _transition_progress / _transition_steps, 1.0f);
+
+      // step transitioning edge color towards destination color
+      RgbwColor transitioning_color = RgbwColor(
+        (1 - fac) * _start_color.R + fac * _dst_color.R,
+        (1 - fac) * _start_color.G + fac * _dst_color.G,
+        (1 - fac) * _start_color.B + fac * _dst_color.B,
+        (1 - fac) * _start_color.W + fac * _dst_color.W
+      );
+      _edge_colors[_transitioning] = transitioning_color;
+
+      if (_transition_progress >= _transition_steps) {
+        // end of animation
+        _transition_progress = 0;
+        _transitioning = ++_transitioning % 4;
+
+        _start_color = _edge_colors[_transitioning];
+        _dst_color = random_hsvw_color();
+      }
+
+      _transition_steps = MOD * 1000;
+    }
+
+    void calculate_colors(RgbwColor* buffer) {
+      float fac;
+      uint8_t r, g, b, w;           // result colors
+      uint8_t r_1, g_1, b_1, w_1;   // x interpolation y = 0
+      uint8_t r_2, g_2, b_2, w_2;   // x interpolation y = 1
+      for (int i = 0; i < NUM_LEDs; i++) {
+        // bilinear interpolation
+        // x interpolation
+        fac = (float) lamp[i].x / lamp_x;
+        r_1 = (1 - fac) * _edge_colors[0].R + fac * _edge_colors[1].R;
+        g_1 = (1 - fac) * _edge_colors[0].G + fac * _edge_colors[1].G;
+        b_1 = (1 - fac) * _edge_colors[0].B + fac * _edge_colors[1].B;
+        w_1 = (1 - fac) * _edge_colors[0].W + fac * _edge_colors[1].W;
+        r_2 = (1 - fac) * _edge_colors[3].R + fac * _edge_colors[2].R;
+        g_2 = (1 - fac) * _edge_colors[3].G + fac * _edge_colors[2].G;
+        b_2 = (1 - fac) * _edge_colors[3].B + fac * _edge_colors[2].B;
+        w_2 = (1 - fac) * _edge_colors[3].W + fac * _edge_colors[2].W;
+        // y interpolation
+        fac = (float) lamp[i].y / lamp_y;
+        r = ((1 - fac) * r_1 + fac * r_2) * BRIGHTNESS;
+        g = ((1 - fac) * g_1 + fac * g_2) * BRIGHTNESS;
+        b = ((1 - fac) * b_1 + fac * b_2) * BRIGHTNESS;
+        w = ((1 - fac) * w_1 + fac * w_2) * BRIGHTNESS;
+
+        if (buffer == NULL) {
+          setPixel(i, RgbwColor(r, g, b, w));
+        } else {
+          buffer[i] = RgbwColor(r, g, b, w);
+        }
+      }
+    }
+
+    void draw() override
+    {
+      calculate_colors(NULL);
+    }
+
+    void getState(RgbwColor* buffer) override
+    {
+      calculate_colors(buffer);
     }
 };
 

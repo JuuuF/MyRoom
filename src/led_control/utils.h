@@ -204,6 +204,21 @@ RgbwColor Hsvw2Rgbw(float H, float S, float V, float W) {
 }
 
 
+/**----------------------------------------------------------------------------
+  random_hsvw_color
+
+  Return a random HSVW color. W component not considered.
+  S and V are set to 1.
+
+  Returns:
+    RgbwColor                       random color.
+*/
+inline RgbwColor random_hsvw_color() {
+  return Hsvw2Rgbw((float) random(360), 1, 1, 0);
+}
+
+
+
 /* ========================================================================= */
 // other functions
 

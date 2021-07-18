@@ -280,6 +280,7 @@ class EdgeColors : public Animation
     RgbwColor _start_color, _dst_color;
     RgbwColor _edge_colors[4]; // 0: 0,0; 1: x,0; 2: x,y; 3: 0,y
     // 0 base, 1,2,3 diffs to 0 (over-/underflow considered!)
+    bool experimantal_mode = false;
 
   public:
     EdgeColors() :
@@ -317,7 +318,17 @@ class EdgeColors : public Animation
         _dst_color = random_hsvw_color();
       }
 
+      // experimental mode
+      static bool last_brightness_zero = false;
+      static float experimental_threshold = 0.01;
+
+      if (!last_brightness_zero && BRIGHTNESS <= experimental_threshold) {
+        experimantal_mode = !experimantal_mode;
+      }
+      last_brightness_zero = BRIGHTNESS <= experimental_threshold;
+
       _transition_steps = MOD * 1000;
+
     }
 
     void calculate_colors(RgbwColor* buffer) {
@@ -339,10 +350,39 @@ class EdgeColors : public Animation
         w_2 = (1 - fac) * _edge_colors[3].W + fac * _edge_colors[2].W;
         // y interpolation
         fac = (float) lamp[i].y / lamp_y;
-        r = ((1 - fac) * r_1 + fac * r_2) * BRIGHTNESS;
-        g = ((1 - fac) * g_1 + fac * g_2) * BRIGHTNESS;
-        b = ((1 - fac) * b_1 + fac * b_2) * BRIGHTNESS;
-        w = ((1 - fac) * w_1 + fac * w_2) * BRIGHTNESS;
+        r = ((1 - fac) * r_1 + fac * r_2);// * BRIGHTNESS;
+        g = ((1 - fac) * g_1 + fac * g_2);// * BRIGHTNESS;
+        b = ((1 - fac) * b_1 + fac * b_2);// * BRIGHTNESS;
+        w = ((1 - fac) * w_1 + fac * w_2);// * BRIGHTNESS;
+
+        // experimantal segmentation-look
+        if (experimantal_mode) {
+          uint8_t trsh = 150;
+          if (r < trsh && g < trsh && b < trsh) {
+            r = 0;
+            g = 0;
+            b = 0;
+          } else if (r > g && r > b) {
+            // r max
+            r = 255 * BRIGHTNESS;
+            g = 0;
+            b = 0;
+          } else if (g > b) {
+            // g max
+            r = 0;
+            g = 255 * BRIGHTNESS;
+            b = 0;
+          } else {
+            // b max
+            r = 0;
+            g = 0;
+            b = 255 * BRIGHTNESS;
+          }
+        } else {
+          r *= BRIGHTNESS;
+          g *= BRIGHTNESS;
+          b *= BRIGHTNESS;
+        }
 
         if (buffer == NULL) {
           setPixel(i, RgbwColor(r, g, b, w));

@@ -73,6 +73,7 @@ void setup()
   animations.push_back(new PlainWhite());
   animations.push_back(new HueLight());
   animations.push_back(new DiagBars());
+  animations.push_back(new MarchEdges());
 
   ANIMATION_COUNT = animations.size();
   ACTIVE_ANIMATION = EEPROM.read(0) % ANIMATION_COUNT;
@@ -104,6 +105,7 @@ void loop() {
   } else {
     // oddly long calculation to compensate negative modulo
     uint8_t idx = (ACTIVE_ANIMATION + ANIMATION_TRANSITION + ANIMATION_COUNT) % ANIMATION_COUNT;
+    Serial.printf("Switching animation %u -> %u\n", ACTIVE_ANIMATION, idx);
     animation_transition(animations[idx]);
   }
 

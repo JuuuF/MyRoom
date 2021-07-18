@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <vector>
+
 struct Pixel {
   uint16_t x, y;
   Pixel(uint16_t x_, uint16_t y_) : x(x_), y(y_) {}
@@ -105,46 +107,6 @@ class Edge
     uint8_t get_length() { return _end - _start; }
 };
 
-
-
-/** -----------------------------------------------------------------
-  Vertex
-
-  Description of a vertex inside the lamp.
-  A vertex consists of end points of multiple edges.
-*/
-class Vertex
-{
-  private:
-    vector<Edge> _edges;            // adjacent edges
-    vector<uint16_t> _indices;      // according indices
-    uint8_t _size;                  // amount of adjacent edges
-
-  public:
-    Vertex() : _size(0) {}
-
-    /**
-      addEdge
-
-      Add a new edge point to the vertex.
-
-      Parameters:
-        Edge e                      Edge object
-        bool start                  true: add edge start, else end
-    */
-    void add(Edge e, bool start)
-    {
-      _edges.push_back(e);
-      _indices.push_back(start ? e.get_start() : e.get_end());
-      _size++;
-    }
-
-    /* getter */
-    vector<Edge> get_edges() { return _edges; }
-    vector<uint16_t> get_indices() { return _indices; }
-    uint8_t get_size() { return _size; }
-};
-
 Edge E[] {
   Edge(0,21),
   Edge(22,35),
@@ -173,6 +135,46 @@ Edge E[] {
   Edge(377,391)
 };
 
+
+/** -----------------------------------------------------------------
+  Vertex
+
+  Description of a vertex inside the lamp.
+  A vertex consists of end points of multiple edges.
+*/
+class Vertex
+{
+  private:
+    vector<uint8_t> _edge_indices;  // adjacent edges indixes for E
+    vector<uint16_t> _pixels;        // pixel on edge and vertex
+    uint8_t _size;                  // amount of adjacent edges
+
+  public:
+    Vertex() : _size(0) {}
+
+    /**
+      addEdge
+
+      Add a new edge point to the vertex.
+
+      Parameters:
+        Edge e                      Edge object
+        bool start                  true: add edge start, else end
+    */
+    void add(uint8_t e, bool start)
+    {
+      _edge_indices.push_back(e);
+      _pixels.push_back(start ? E[e].get_start() : E[e].get_end());
+      _size++;
+    }
+
+    /* getter */
+    vector<uint8_t> get_edges() { return _edge_indices; }
+    vector<uint16_t> get_indices() { return _pixels; }
+    uint8_t get_size() { return _size; }
+};
+
+
 Vertex V[12];
 
 #define EDGE_START true
@@ -187,76 +189,105 @@ Vertex V[12];
 */
 void init_lamp() {
   V[0] = Vertex();
-  V[0].add(E[0], EDGE_END);
-  V[0].add(E[1], EDGE_START);
-  V[0].add(E[24], EDGE_END);
+  V[0].add(0, EDGE_END);
+  V[0].add(1, EDGE_START);
+  V[0].add(24, EDGE_END);
 
   V[1] = Vertex();
-  V[1].add(E[19], EDGE_END);
-  V[1].add(E[20], EDGE_START);
-  V[1].add(E[23], EDGE_END);
-  V[1].add(E[24], EDGE_START);
+  V[1].add(19, EDGE_END);
+  V[1].add(20, EDGE_START);
+  V[1].add(23, EDGE_END);
+  V[1].add(24, EDGE_START);
 
   V[2] = Vertex();
-  V[2].add(E[15], EDGE_END);
-  V[2].add(E[16], EDGE_START);
-  V[2].add(E[18], EDGE_END);
-  V[2].add(E[19], EDGE_START);
+  V[2].add(15, EDGE_END);
+  V[2].add(16, EDGE_START);
+  V[2].add(18, EDGE_END);
+  V[2].add(19, EDGE_START);
 
   V[3] = Vertex();
-  V[3].add(E[13], EDGE_END);
-  V[3].add(E[14], EDGE_START);
-  V[3].add(E[15], EDGE_START);
+  V[3].add(13, EDGE_END);
+  V[3].add(14, EDGE_START);
+  V[3].add(15, EDGE_START);
 
   V[4] = Vertex();
-  V[4].add(E[1], EDGE_END);
-  V[4].add(E[2], EDGE_START);
-  V[4].add(E[4], EDGE_END);
-  V[4].add(E[5], EDGE_START);
-  V[4].add(E[22], EDGE_END);
-  V[4].add(E[23], EDGE_START);
+  V[4].add(1, EDGE_END);
+  V[4].add(2, EDGE_START);
+  V[4].add(4, EDGE_END);
+  V[4].add(5, EDGE_START);
+  V[4].add(22, EDGE_END);
+  V[4].add(23, EDGE_START);
 
   V[5] = Vertex();
-  V[5].add(E[17], EDGE_END);
-  V[5].add(E[18], EDGE_START);
-  V[5].add(E[20], EDGE_END);
-  V[5].add(E[21], EDGE_START);
-  V[5].add(E[22], EDGE_START);
+  V[5].add(17, EDGE_END);
+  V[5].add(18, EDGE_START);
+  V[5].add(20, EDGE_END);
+  V[5].add(21, EDGE_START);
+  V[5].add(22, EDGE_START);
 
   V[6] = Vertex();
-  V[6].add(E[9], EDGE_END);
-  V[6].add(E[10], EDGE_START);
-  V[6].add(E[12], EDGE_END);
-  V[6].add(E[13], EDGE_START);
-  V[6].add(E[16], EDGE_END);
-  V[6].add(E[17], EDGE_START);
+  V[6].add(9, EDGE_END);
+  V[6].add(10, EDGE_START);
+  V[6].add(12, EDGE_END);
+  V[6].add(13, EDGE_START);
+  V[6].add(16, EDGE_END);
+  V[6].add(17, EDGE_START);
 
   V[7] = Vertex();
-  V[7].add(E[5], EDGE_END);
-  V[7].add(E[6], EDGE_START);
-  V[7].add(E[8], EDGE_END);
-  V[7].add(E[9], EDGE_START);
-  V[7].add(E[21], EDGE_END);
+  V[7].add(5, EDGE_END);
+  V[7].add(6, EDGE_START);
+  V[7].add(8, EDGE_END);
+  V[7].add(9, EDGE_START);
+  V[7].add(21, EDGE_END);
 
   V[8] = Vertex();
-  V[8].add(E[0], EDGE_START);
-  V[8].add(E[2], EDGE_END);
-  V[8].add(E[3], EDGE_START);
+  V[8].add(0, EDGE_START);
+  V[8].add(2, EDGE_END);
+  V[8].add(3, EDGE_START);
 
   V[9] = Vertex();
-  V[9].add(E[3], EDGE_END);
-  V[9].add(E[4], EDGE_START);
-  V[9].add(E[6], EDGE_END);
-  V[9].add(E[7], EDGE_START);
+  V[9].add(3, EDGE_END);
+  V[9].add(4, EDGE_START);
+  V[9].add(6, EDGE_END);
+  V[9].add(7, EDGE_START);
 
   V[10] = Vertex();
-  V[10].add(E[7], EDGE_END);
-  V[10].add(E[8], EDGE_START);
-  V[10].add(E[10], EDGE_END);
-  V[10].add(E[11], EDGE_START);
+  V[10].add(7, EDGE_END);
+  V[10].add(8, EDGE_START);
+  V[10].add(10, EDGE_END);
+  V[10].add(11, EDGE_START);
 
   V[11] = Vertex();
-  V[11].add(E[11], EDGE_END);
-  V[11].add(E[12], EDGE_START);
-  V[11].add(E[14], EDGE_END);
+  V[11].add(11, EDGE_END);
+  V[11].add(12, EDGE_START);
+  V[11].add(14, EDGE_END);
 }
+
+
+/**----------------------------------------------------------------------------
+  get_vertex_index_of
+
+  Get the vertex that a given pixel s a part of.
+  It is assumed that a vertex can be uniquely identified by a pixel that it
+  contains.
+  
+  Returns:
+    -1                              if no vertex is associated to the pixel
+    vertex index for V              otherwise
+*/
+int8_t get_vertex_index_of(uint16_t pixel) {
+  uint8_t vert_size;
+  vector<uint16_t> local_pixels;
+  // loop over all vertices
+  for (uint8_t i = 0; i < ARRAY_SIZE(V); i++) {
+    vert_size = V[i].get_size();
+    local_pixels = V[i].get_indices();
+    // loop over vertex pixels
+    for (uint8_t e = 0; e < vert_size; e++) {
+      if (local_pixels[e] == pixel)
+        return local_pixels[e];
+    }
+  }
+  return -1;
+}
+

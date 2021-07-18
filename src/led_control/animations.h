@@ -269,6 +269,144 @@ class DiagBars : public Animation
 
 
 
+// TODO: Fix
+/** -----------------------------------------------------------------
+  MarchEdges
+
+  March along the edges
+
+  BRIGHTNESS controls brightness
+  MOD controls speed
+*/
+class EdgeMarcher : public Animation
+{
+    
+  private:
+    uint8_t _current_edge;          // currently active edge
+    bool _direction;                // true: going up, false: down
+    float _progress, _progress_step;    // progress vars
+    bool _stationary;               // currently animating or waiting
+
+  public:
+    EdgeMarcher() : 
+      _current_edge(random(ARRAY_SIZE(E))),
+      _direction((bool) random(2)),
+      _progress(0),
+      _progress_step(0.025),
+      _stationary(false)
+    {}
+
+    void update() override
+    {
+      _progress = min(_progress + _progress_step, 1.0f);
+      _stationary = _progress >= 1.0;
+    }
+
+    void draw() override
+    {
+      // clear current edge
+      // setSolid(E[_current_edge].get_start(), E[_current_edge].get_end() + 1, RgbwColor(0));
+
+      if (!_stationary) {
+        // ongoing transition  
+        float start, end;
+        if(_progress < 0.5) {
+          // growing
+          start = E[_current_edge].get_start();
+          end = start + 2 * _progress * E[_current_edge].get_length();
+        } else {
+          // shrinking
+          start = E[_current_edge].get_start() + (2 * (_progress - 0.5)) * E[_current_edge].get_length();
+          end = E[_current_edge].get_end() + 1;
+        }
+        if (!_direction) {
+          // reverse direction
+          uint16_t offset = E[_current_edge].get_end() + E[_current_edge].get_start();
+          start = offset - start;
+          end   = offset - end;
+        }
+        addFloat(start, end, RgbwColor(100));
+      } else {
+        // done transitioning
+        _current_edge = random(ARRAY_SIZE(E));
+
+        // get random new edge
+        // uint8_t end_vert_index = (uint8_t) get_vertex_index_of(_direction ? E[_current_edge].get_end() : E[_current_edge].get_start());
+        // vector<uint8_t> adjacent_edges = V[end_vert_index].get_edges();
+        // uint8_t next_edge_index = random(adjacent_edges.size());
+        // _current_edge = adjacent_edges[next_edge_index];
+        // _direction = E[_current_edge].get_start() == V[end_vert_index].get_indices()[next_edge_index];
+
+
+        _progress = 0;
+        _stationary = false;
+      }
+    }
+
+    void getState(RgbwColor* buffer)
+    {
+      if (!_stationary) {
+        // ongoing transition
+        clear_strip();
+        float start, end;
+        if(_progress < 0.5) {
+          // growing
+          start = E[_current_edge].get_start();
+          end = 2 * _progress * E[_current_edge].get_length();
+        } else {
+          // shrinking
+          start = 1 - (2 * _progress) * E[_current_edge].get_length();
+          end = E[_current_edge].get_end() + 1;
+        }
+        for (uint8_t i = start; i < end; i++) {
+          addPixel(i, RgbwColor(100));
+        }
+        // addFloat(start, end, RgbwColor(100));
+        Serial.printf("start: %f, end: %f\n", start, end);
+      } else {
+        Serial.println("BLAH");
+        // done transitioning
+        _current_edge = random(ARRAY_SIZE(E));
+        _progress = 0;
+        _stationary = false;
+      }
+    }
+};
+
+class MarchEdges : public Animation
+{
+  private:
+    vector<EdgeMarcher*> _marchers;
+    uint8_t _count;
+  
+  public:
+    MarchEdges(uint8_t marcher_amount = 3) :
+      _count(marcher_amount)
+    {
+      for (uint8_t i = 0; i < _count; i++) {
+        _marchers.push_back(new EdgeMarcher());
+      }
+    }
+
+    void update() override
+    {
+      for (uint8_t i = 0; i < _count; i++) {
+        _marchers[i]->update();
+      }
+    }
+
+    void draw() override
+    {
+      clear_strip();
+      for (uint8_t i = 0; i < _count; i++) {
+        _marchers[i]->draw();
+      }
+    }
+};
+
+
+
+
 /* ========================================================================= */
 /* animation functions */
 
@@ -346,7 +484,6 @@ void animation_transition(Animation* next_animation) {
   // update params
   t_pos += t_delta;
 
-  Serial.printf("t_pos = %d\n", t_pos);
   // setup transition bar
   fadeToBlackBy(32 * BRIGHTNESS, transition_buffer);
 
@@ -355,7 +492,6 @@ void animation_transition(Animation* next_animation) {
     // TODO: outsource transition into own class
     if(t_pos - lamp[i].x > 0 && t_pos - lamp[i].x < t_thickness) {
       transition_buffer[i].W = BRIGHTNESS * 255;
-      Serial.printf("&d\n", transition_buffer[i].W);
       mask[i] = true;
     }
 
@@ -788,52 +924,6 @@ void animation_transition(Animation* next_animation) {
 
 // }
 
-
-// void diag_bars() {
-//   static int x = random(lamp_x);
-//   static int _x_dir = 1;
-//   static int _dx = 20;
-
-//   static int y = random(lamp_x);
-//   static int _y_dir = 1;
-//   static int _dy = 20;
-
-//   fadeToBlackBy(10);
-
-//   static float _hue_x = random(360);
-//   static float _hue_y = random(360);
-
-//   for (int i = 0; i < NUM_LEDs; i++) {
-//     if (abs((lamp[i].x + lamp[i].y) - x) < _dx) {
-//       // addPixel(i, Hsvw2Rgbw(_hue_x, 1, get_poti(MOD), 0));
-//     }
-//     if (abs((lamp[i].x - lamp[i].y) - y) < _dy) {
-//       // addPixel(i, Hsvw2Rgbw(_hue_y, 1, get_poti(MOD), 0));
-//     }
-//   }
-
-//   if (x >= lamp_x + lamp_y || x < 0) {
-//     _x_dir *= -1;
-//     x += 10 * _x_dir;
-//     _hue_x = random(360);
-//   }
-//   x += 10 * _x_dir;
-//   _hue_x += 0.5;
-//   if (_hue_x > 360) {
-//     _hue_x -= 360;
-//   }
-
-//   if (y >= lamp_x || y < -lamp_y) {
-//     _y_dir *= -1;
-//     y += 10 * _y_dir;
-//     _hue_y = random(360);
-//   }
-//   y += 12 * _y_dir;
-//   _hue_y += 0.5;
-//   if (_hue_y > 360) {
-//     _hue_y -= 360;
-//   }
-// }
 
 
 // void sine_wave() {

@@ -73,9 +73,9 @@ class PlainWhite : public Animation
   private:
     float _ratio = 0.9;             // filter ratio
     float _neutral_deadband = 0.1;  // neutral deadband in percent
-    uint8_t _w[4] = {253, 244, 220,   0};    // warm color values
+    uint8_t _w[4] = {255, 252, 50,   0};   // warm color values
     uint8_t _n[4] = {0,   0,   0,   255};  // neutral color values
-    uint8_t _c[4] = {244,  253, 255, 0};    // cold color values
+    uint8_t _c[4] = {244,  253, 255, 0};   // cold color values
 
     /* Get color based on current parameters */
     RgbwColor _get_color() {

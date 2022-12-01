@@ -236,7 +236,7 @@ inline RgbwColor random_hsvw_color() {
 // TODO: implement non-linear brightness calculation
 void update_inputs() {
   // button inputs
-  LEFT_BUTTON  = digitalRead(BTN_L_PIN);
+  LEFT_BUTTON  = LOW; // digitalRead(BTN_L_PIN);
   RIGHT_BUTTON = digitalRead(BTN_R_PIN);
 
   // poti inputs
